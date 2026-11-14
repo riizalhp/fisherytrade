@@ -43,11 +43,11 @@ export default function InventoryPage() {
     <div className="flex-1 flex flex-col">
       <Header
         title="Manajemen Gudang & Stok Batch"
-        subtitle="Daftar inventaris multi-cold storage dengan penomoran batch unik & monitoring FIFO"
+        subtitle="Daftar inventaris gudang distribusi barang perikanan dengan penomoran batch unik & monitoring FIFO"
       />
 
       <main className="p-6 space-y-6 max-w-7xl">
-        {/* Cold Storage Tab Filters */}
+        {/* Warehouse Tab Filters */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <button
             onClick={() => setSelectedStorage('all')}
@@ -137,7 +137,7 @@ export default function InventoryPage() {
                 <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
                   <th className="py-3 px-4">Batch ID & Gudang</th>
                   <th className="py-3 px-4">Komoditas & Olahan</th>
-                  <th className="py-3 px-4">Grade & Pembekuan</th>
+                  <th className="py-3 px-4">Grade & Spesifikasi Mutu</th>
                   <th className="py-3 px-4">Tgl Inbound (FIFO)</th>
                   <th className="py-3 px-4">Stok Tersedia</th>
                   <th className="py-3 px-4">Bin Rak</th>

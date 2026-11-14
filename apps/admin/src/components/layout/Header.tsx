@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Share2, Bell, RefreshCw, ThermometerSnowflake } from 'lucide-react';
+import { Share2, Bell, RefreshCw, Warehouse } from 'lucide-react';
 
 interface HeaderProps {
   title: string;
@@ -13,10 +13,10 @@ export function Header({ title, subtitle }: HeaderProps) {
     const text = encodeURIComponent(
       `*UPDATE STOK HARIAN FISHERY TRADE (WMS)*\n` +
       `Tanggal: ${new Date().toLocaleDateString('id-ID')}\n\n` +
-      `📍 *Muara Baru (JKT)*: 342.5 Ton (Tuna Loin IQF, Kakap G&G)\n` +
+      `📍 *Muara Baru (JKT)*: 342.5 Ton (Tuna Loin, Kakap G&G)\n` +
       `📍 *Brondong (LMG)*: 285.0 Ton (Udang Vaname HOSO/HLSO)\n` +
       `📍 *Benoa (DPS)*: 198.4 Ton (Tuna Export Grade Whole Round)\n` +
-      `📍 *Bitung (BTG)*: 620.0 Ton (Cakalang Blast Freezer)\n\n` +
+      `📍 *Bitung (BTG)*: 620.0 Ton (Cakalang Olahan Terstandar)\n\n` +
       `Info & Penawaran Resmi: Hubungi Sales Tim Fishery Trade.`
     );
     window.open(`https://wa.me/?text=${text}`, '_blank');
@@ -30,9 +30,9 @@ export function Header({ title, subtitle }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-4">
-        {/* Cold Storage Status Indicator */}
+        {/* Warehouse Status Indicator */}
         <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-xs text-slate-600">
-          <ThermometerSnowflake className="w-3.5 h-3.5 text-blue-500" />
+          <Warehouse className="w-3.5 h-3.5 text-blue-500" />
           <span>4 Gudang Terpantau: <b>1,445.9 Ton</b> (70.5% Kapasitas)</span>
         </div>
 

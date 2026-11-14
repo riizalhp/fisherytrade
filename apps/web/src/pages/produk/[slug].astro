@@ -2,18 +2,20 @@
 import Layout from '../../layouts/Layout.astro';
 import ProductGallery from '../../components/ProductGallery';
 import { PRODUCTS } from '../../constants.tsx';
+import { getMarketplaceProducts } from '../../lib/catalog-service.ts';
 import type { Product } from '../../types.ts';
 
-export function getStaticPaths() {
-  return PRODUCTS.map((product) => ({
+export async function getStaticPaths() {
+  const products = await getMarketplaceProducts();
+  return products.map((product) => ({
     params: { slug: product.slug },
-    props: { product },
+    props: { product, allProducts: products },
   }));
 }
 
-const { product } = Astro.props as { product: Product };
+const { product, allProducts = PRODUCTS } = Astro.props as { product: Product; allProducts?: Product[] };
 const gallery = product.images && product.images.length > 0 ? product.images : [product.imageUrl];
-const otherProducts = PRODUCTS.filter((p) => p.id !== product.id).slice(0, 4);
+const otherProducts = allProducts.filter((p) => p.id !== product.id).slice(0, 4);
 ---
 
 <Layout title={product.name} description={product.description} image={product.imageUrl}>

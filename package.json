@@ -5,9 +5,11 @@
     "dev": "turbo dev --ui=stream",
     "build": "turbo build",
     "lint": "turbo lint",
-    "clean": "turbo clean"
+    "clean": "turbo clean",
+    "supabase": "supabase"
   },
   "devDependencies": {
+    "supabase": "^3.1.0",
     "turbo": "^2.4.4",
     "typescript": "~5.8.2"
   },

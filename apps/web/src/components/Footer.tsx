@@ -26,13 +26,13 @@ const Footer: React.FC = () => {
                     FISHERY<span className="text-aruna-400">TRADE</span>
                   </span>
                   <span className="text-[10px] font-mono tracking-wider uppercase text-aruna-300">
-                    B2B Seafood & Multi-Cold Storage Platform
+                    Marketplace Barang Perikanan B2B Indonesia
                   </span>
                 </div>
               </a>
 
               <p className="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6 max-w-md">
-                Menyediakan pasokan ikan dan hasil laut beku terstandar industri (IQF -25°C & Air Blast) untuk hotel, restoran, supermarket, dan distributor daerah di seluruh Indonesia.
+                Pusat marketplace barang perikanan dan hasil laut terstandar untuk hotel, restoran, supermarket, dan distributor daerah di seluruh Indonesia.
               </p>
 
               {/* Muara Baru Map Embed */}
@@ -45,12 +45,12 @@ const Footer: React.FC = () => {
                     style={{ border: 0 }}
                     allowFullScreen={false}
                     loading="lazy"
-                    title="Peta Cold Storage Muara Baru FisheryTrade"
+                    title="Peta Gudang Distribusi Muara Baru FisheryTrade"
                   ></iframe>
                 </div>
                 <span className="text-xs text-slate-400 flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                  <span>Fasilitas Pusat: Pelabuhan Perikanan Nizam Zachman, Muara Baru, Jakarta Utara</span>
+                  <span>Hub Gudang Pusat: Pelabuhan Perikanan Nizam Zachman, Muara Baru, Jakarta Utara</span>
                 </span>
               </div>
             </div>
@@ -62,11 +62,9 @@ const Footer: React.FC = () => {
                   Info Platform
                 </h4>
                 <ul className="space-y-2.5 text-xs sm:text-sm text-slate-300">
-                  <li><a href="/produk" className="hover:text-aruna-400 transition-colors">Katalog Ikan Beku</a></li>
-                  <li><a href="#cold-storage" className="hover:text-aruna-400 transition-colors">Titik Cold Storage</a></li>
-                  <li><a href="/studi-kasus" className="hover:text-aruna-400 transition-colors">Studi Kasus Resto</a></li>
-                  <li><a href="/faq" className="hover:text-aruna-400 transition-colors">FAQ & Minimum Order</a></li>
-                  <li><a href={blogHref} className="hover:text-aruna-400 transition-colors">Edukasi Rantai Dingin</a></li>
+                  <li><a href="/" className="hover:text-aruna-400 transition-colors">Beranda</a></li>
+                  <li><a href="/produk" className="hover:text-aruna-400 transition-colors">Product</a></li>
+                  <li><a href="/tentang-kami" className="hover:text-aruna-400 transition-colors">Tentang Kami</a></li>
                 </ul>
               </div>
 

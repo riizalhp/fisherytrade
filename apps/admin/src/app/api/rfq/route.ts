@@ -42,7 +42,7 @@ export async function POST(request: Request) {
       `🐟 *Komoditas*: ${commodityName}\n` +
       `✂️ *Olahan*: ${processingCut || '-'}\n` +
       `⭐ *Grade*: ${grade || 'Grade A'}\n` +
-      `❄️ *Metode Beku*: ${freezingMethod || 'IQF'}\n` +
+      `📦 *Kemasan / Mutu*: ${freezingMethod || 'Standar Mutu KKP'}\n` +
       `⚖️ *Volume*: *${requestedVolumeTons} Ton*\n` +
       `────────────────────────\n` +
       `Mohon segera ditindaklanjuti untuk kalkulasi ongkir armada Shipper & proforma invoice.`

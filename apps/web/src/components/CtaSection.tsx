@@ -38,7 +38,7 @@ const CtaSection: React.FC = () => {
             }
             title="WhatsApp Sales B2B"
             content="0822-4111-4959"
-            href="https://wa.me/6282241114959?text=Halo%20FisheryTrade,%20saya%20tertarik%20dengan%20layanan%20pasokan%20ikan%20beku."
+            href="https://wa.me/6282241114959?text=Halo%20FisheryTrade,%20saya%20tertarik%20dengan%20katalog%20barang%20perikanan."
           />
 
           <ContactItem
@@ -59,7 +59,7 @@ const CtaSection: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             }
-            title="Cold Storage Utama"
+            title="Gudang Distribusi Utama"
             content="Pelabuhan Muara Baru, Jakarta Utara"
             href="https://maps.google.com/?q=Pelabuhan+Muara+Baru+Jakarta"
           />

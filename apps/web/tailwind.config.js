@@ -3,11 +3,24 @@ export default {
   content: ['./src/**/*.{astro,html,js,jsx,md,mdx,ts,tsx}'],
   theme: {
     extend: {
+      spacing: {
+        '120': '30rem',
+      },
       fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+        sans: ['Inter', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
       },
       colors: {
+        background: 'hsl(var(--background, 0 0% 100%))',
+        foreground: 'hsl(var(--foreground, 222.2 47.4% 11.2%))',
+        muted: {
+          DEFAULT: 'hsl(var(--muted, 210 40% 96.1%))',
+          foreground: 'hsl(var(--muted-foreground, 215.4 16.3% 46.9%))',
+        },
+        card: {
+          DEFAULT: 'hsl(var(--card, 0 0% 100%))',
+          foreground: 'hsl(var(--card-foreground, 222.2 47.4% 11.2%))',
+        },
         aruna: {
           50: '#F0F7FD',
           100: '#DDF0FC',

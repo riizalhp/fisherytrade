@@ -16,7 +16,7 @@ export default function AlertsPage() {
       `Komoditas: ${commodity}\n` +
       `Batch: ${batchCode}\n` +
       `Volume Tersedia: ${tons.toFixed(1)} Ton\n` +
-      `Kondisi: Mutu Terjaga -24°C, Siap Angkut Truk/Kontainer.\n` +
+      `Kondisi: Mutu Terstandar Prima, Siap Angkut Truk/Kontainer.\n` +
       `Harga Spesial: Hubungi tim sales untuk penawaran nego hari ini!`
     );
     window.open(`https://wa.me/?text=${text}`, '_blank');
@@ -26,7 +26,7 @@ export default function AlertsPage() {
     <div className="flex-1 flex flex-col">
       <Header
         title="Alert Penuaan Stok (FIFO Aging Monitoring)"
-        subtitle="Sistem deteksi dini stok beku mendekati batas simpan (>45 & >90 hari) untuk mencegah kerugian mutu"
+        subtitle="Sistem deteksi dini stok barang perikanan mendekati batas simpan (>45 & >90 hari) untuk mencegah kerugian mutu"
       />
 
       <main className="p-6 space-y-6 max-w-7xl">
@@ -74,7 +74,7 @@ export default function AlertsPage() {
                     <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">{b.grade}</span>
                   </div>
                   <div className="text-xs text-slate-500 flex items-center gap-3">
-                    <span>Gudang: <b>{b.coldStorageId.toUpperCase()}</b> (Rak {b.storageLocationBin})</span>
+                    <span>Gudang: <b>{b.coldStorageId.replace('cs-', 'GD-').toUpperCase()}</b> (Rak {b.storageLocationBin})</span>
                     <span>•</span>
                     <span>Masuk: <b>{b.inboundDate}</b> (<span className="text-rose-600 font-bold">{b.daysInStorage} Hari</span>)</span>
                     <span>•</span>
@@ -124,7 +124,7 @@ export default function AlertsPage() {
                     <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">{b.grade}</span>
                   </div>
                   <div className="text-xs text-slate-500 flex items-center gap-3">
-                    <span>Gudang: <b>{b.coldStorageId.toUpperCase()}</b> (Rak {b.storageLocationBin})</span>
+                    <span>Gudang: <b>{b.coldStorageId.replace('cs-', 'GD-').toUpperCase()}</b> (Rak {b.storageLocationBin})</span>
                     <span>•</span>
                     <span>Masuk: <b>{b.inboundDate}</b> (<span className="text-amber-600 font-bold">{b.daysInStorage} Hari</span>)</span>
                   </div>

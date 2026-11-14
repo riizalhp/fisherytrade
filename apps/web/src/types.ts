@@ -59,11 +59,15 @@ export interface Product {
   grade?: string;
   moq?: string;
   pricePerKg?: string;
+  priceNumeric?: number;
   stockJakarta?: string;
   stockLamongan?: string;
   stockBali?: string;
   totalStock?: string;
   whatsappUrl?: string;
+  cutType?: string;
+  glazing?: string;
+  shelfLife?: string;
 }
 
 export interface TeamMember {

@@ -1,11 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PRODUCTS } from '../constants.tsx';
+import type { Product } from '../types.ts';
 
 const WarehouseCatalogSection: React.FC = () => {
+  const [items, setItems] = useState<Product[]>(PRODUCTS);
   const [selectedWarehouse, setSelectedWarehouse] = useState<'all' | 'jakarta' | 'lamongan' | 'bali'>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  const filteredProducts = PRODUCTS.filter((product) => {
+  useEffect(() => {
+    const fetchLiveStock = async () => {
+      try {
+        const apiUrl = 'http://localhost:4000';
+        const res = await fetch(`${apiUrl}/api/catalog?format=marketplace`, {
+          headers: { Accept: 'application/json' },
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+            setItems((prev) =>
+              prev.map((item) => {
+                const live = json.data.find((l: Product) => l.slug === item.slug || l.name === item.name);
+                if (!live) return item;
+                return {
+                  ...item,
+                  stockJakarta: live.stockJakarta || item.stockJakarta,
+                  stockLamongan: live.stockLamongan || item.stockLamongan,
+                  stockBali: live.stockBali || item.stockBali,
+                  totalStock: live.totalStock || item.totalStock,
+                };
+              })
+            );
+          }
+        }
+      } catch {}
+    };
+    fetchLiveStock();
+  }, []);
+
+  const filteredProducts = items.filter((product) => {
     if (selectedCategory !== 'all' && product.category !== selectedCategory) {
       return false;
     }
@@ -22,10 +54,10 @@ const WarehouseCatalogSection: React.FC = () => {
   });
 
   return (
-    <section id="cold-storage" className="bg-white py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-b border-slate-200">
+    <section id="gudang-distribusi" className="bg-white py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-b border-slate-200">
       <div className="max-w-7xl mx-auto">
         
-        {/* Header Title & Cold Chain Control */}
+        {/* Header Title & Warehouse Control */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
           <div>
             <div className="inline-flex items-center gap-2 py-1 px-3 bg-aruna-50 border border-aruna-200 text-aruna-700 rounded-md text-xs font-semibold mb-3">
@@ -33,10 +65,10 @@ const WarehouseCatalogSection: React.FC = () => {
               <span>Transparansi Stok Multi-Gudang Real-Time</span>
             </div>
             <h2 className="text-2xl sm:text-4xl font-extrabold text-aruna-900 tracking-tight">
-              Katalog Komoditas & Ketersediaan Stok Fisik
+              Katalog Barang Perikanan & Ketersediaan Stok Fisik
             </h2>
             <p className="text-slate-600 text-sm mt-2 max-w-2xl">
-              Cek tonase ikan beku bersertifikat mutu resmi langsung per titik fasilitas cold storage kami untuk estimasi jarak dan kecepatan kirim.
+              Cek tonase barang perikanan bersertifikat mutu resmi langsung per titik gudang distribusi kami untuk estimasi jarak dan kecepatan kirim.
             </p>
           </div>
 
@@ -54,18 +86,30 @@ const WarehouseCatalogSection: React.FC = () => {
           {/* Warehouse Location Filter */}
           <div>
             <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-              Pilih Fasilitas Cold Storage
+              Pilih Gudang Distribusi
             </label>
-            <select
-              value={selectedWarehouse}
-              onChange={(e) => setSelectedWarehouse(e.target.value as any)}
-              className="w-full text-xs font-medium bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-aruna-500"
-            >
-              <option value="all">Semua Fasilitas (Lintas Gudang)</option>
-              <option value="jakarta">📍 CS Muara Baru (Jakarta Utara)</option>
-              <option value="lamongan">📍 CS Brondong (Lamongan, Jatim)</option>
-              <option value="bali">📍 CS Benoa (Denpasar, Bali)</option>
-            </select>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <select
+                value={selectedWarehouse}
+                onChange={(e) => setSelectedWarehouse(e.target.value as any)}
+                className="w-full appearance-none pl-9 pr-9 text-xs font-semibold bg-white border border-slate-200 rounded-xl py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-aruna-500 hover:border-slate-300 transition-all cursor-pointer shadow-2xs"
+              >
+                <option value="all">Semua Fasilitas (Lintas Gudang)</option>
+                <option value="jakarta">Gudang Muara Baru (Jakarta Utara)</option>
+                <option value="lamongan">Gudang Brondong (Lamongan, Jatim)</option>
+                <option value="bali">Gudang Benoa (Denpasar, Bali)</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
 
           {/* Category Filter */}
@@ -73,23 +117,35 @@ const WarehouseCatalogSection: React.FC = () => {
             <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5">
               Kategori Komoditas
             </label>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full text-xs font-medium bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-aruna-500"
-            >
-              <option value="all">Semua Kategori Ikan & Seafood</option>
-              <option value="Ikan Pelagis">Ikan Pelagis (Tuna Loin, Cakalang)</option>
-              <option value="Ikan Demersal">Ikan Demersal (Kakap Merah)</option>
-              <option value="Chepalopoda">Chepalopoda (Cumi Tube)</option>
-              <option value="Crustacea">Crustacea (Udang Vaname)</option>
-            </select>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+              </div>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full appearance-none pl-9 pr-9 text-xs font-semibold bg-white border border-slate-200 rounded-xl py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-aruna-500 hover:border-slate-300 transition-all cursor-pointer shadow-2xs"
+              >
+                <option value="all">Semua Kategori Barang Perikanan</option>
+                <option value="Ikan Pelagis">Ikan Pelagis (Tuna Loin, Cakalang)</option>
+                <option value="Ikan Demersal">Ikan Demersal (Kakap Merah)</option>
+                <option value="Chepalopoda">Chepalopoda (Cumi Tube)</option>
+                <option value="Crustacea">Crustacea (Udang Vaname)</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
 
           {/* Direct WhatsApp Callout */}
           <div className="flex flex-col justify-end">
             <a
-              href="https://wa.me/6282241114959?text=Halo%20FisheryTrade,%20saya%20ingin%20cek%20stok%20harian%20ikan%20beku%20terbaru."
+              href="https://wa.me/6282241114959?text=Halo%20FisheryTrade,%20saya%20ingin%20cek%20stok%20harian%20barang%20perikanan%20terbaru."
               target="_blank"
               rel="noopener noreferrer"
               className="w-full bg-aruna-50 hover:bg-aruna-100 text-aruna-700 border border-aruna-200 text-xs font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors"
@@ -121,7 +177,7 @@ const WarehouseCatalogSection: React.FC = () => {
                 {/* Badges Top Left */}
                 <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 items-start">
                   <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-aruna-600 text-white shadow-xs">
-                    {product.freezeMethod || 'IQF -25°C'}
+                    {product.freezeMethod || 'Mutu Terstandar'}
                   </span>
                   <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500 text-white shadow-xs">
                     {product.grade || 'Grade A'}
@@ -215,7 +271,7 @@ const WarehouseCatalogSection: React.FC = () => {
                     href={`/produk/${product.slug}`}
                     className="w-full bg-white hover:bg-aruna-50 text-aruna-700 border border-aruna-200 text-xs font-semibold py-2 px-3 rounded-xl transition-colors text-center"
                   >
-                    Detail Spesifikasi Dapur
+                    Detail Spesifikasi Produk
                   </a>
                 </div>
 

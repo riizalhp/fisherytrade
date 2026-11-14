@@ -18,7 +18,7 @@ export default function RFQListPage() {
     <div className="flex-1 flex flex-col">
       <Header
         title="Daftar Permintaan Penawaran (Inbound RFQ)"
-        subtitle="Leads pemesanan ikan dari katalog marketplace publik (shop), kalkulasi armada Shipper, dan auto-routing WhatsApp"
+        subtitle="Leads pemesanan barang perikanan dari katalog marketplace publik (shop), kalkulasi armada Shipper, dan auto-routing WhatsApp"
       />
 
       <main className="p-6 space-y-6 max-w-7xl">

@@ -53,7 +53,7 @@ const FaqSection: React.FC = () => {
           <div className="relative aspect-[4/3] sm:aspect-[0.95] rounded-3xl overflow-hidden shadow-lg border border-slate-200">
             <img
               src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=700&q=80"
-              alt="Fasilitas cold storage dan tim operasional FisheryTrade"
+              alt="Sentra gudang distribusi dan tim operasional FisheryTrade"
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-aruna-950/80 via-transparent to-transparent"></div>

@@ -5,7 +5,8 @@ export interface RFQItem {
   commodityName: string;
   processingCut: string;
   grade: string;
-  freezingMethod: string;
+  freezingMethod?: string;
+  packagingType?: string;
   requestedVolumeTons: number;
 }
 
@@ -18,6 +19,8 @@ export interface RFQInquiry {
   buyerEmail?: string;
   coldStorageSourceId: string;
   coldStorageName: string;
+  warehouseSourceId?: string;
+  warehouseName?: string;
   destinationCity: string;
   items: RFQItem[];
   totalVolumeTons: number;
@@ -28,7 +31,8 @@ export interface RFQInquiry {
 }
 
 export interface ShipperEstimationRequest {
-  originColdStorageId: string;
+  originColdStorageId?: string;
+  originWarehouseId?: string;
   destinationCity: string;
   weightTons: number;
 }

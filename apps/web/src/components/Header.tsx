@@ -48,13 +48,13 @@ const Header: React.FC = () => {
 
   const headerBg = isScrolled
     ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-200"
-    : "bg-aruna-900/80 backdrop-blur-xs border-b border-aruna-800/50";
+    : isMenuOpen
+      ? "bg-aruna-950 border-b border-aruna-800"
+      : "bg-transparent border-b border-transparent";
 
-  const brandText = isScrolled ? "text-aruna-900" : "text-white";
-  const brandSub = isScrolled ? "text-aruna-600" : "text-aruna-200";
   const linkText = isScrolled
     ? "text-slate-700 hover:text-aruna-600"
-    : "text-slate-100 hover:text-white";
+    : "text-white/90 hover:text-white";
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${headerBg}`}>
@@ -63,17 +63,9 @@ const Header: React.FC = () => {
           
           {/* Brand Logo */}
           <div className="flex-shrink-0">
-            <a href="/" onClick={handleLinkClick} className="flex items-center gap-3 group">
+            <a href="/" onClick={handleLinkClick} className="flex items-center group" aria-label="FisheryTrade">
               <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center p-1 shadow-md border border-slate-100 group-hover:border-aruna-300 transition-all">
                 <img src="/logo.png" alt="FisheryTrade" className="w-full h-full object-contain" />
-              </div>
-              <div className="flex flex-col">
-                <span className={`text-xl font-extrabold tracking-tight transition-colors ${brandText}`}>
-                  FISHERY<span className="text-aruna-500">TRADE</span>
-                </span>
-                <span className={`text-[10px] font-mono tracking-wider uppercase ${brandSub}`}>
-                  Cold Chain B2B Platform
-                </span>
               </div>
             </a>
           </div>
@@ -142,7 +134,7 @@ const Header: React.FC = () => {
               className={`p-2.5 rounded-lg border transition-colors ${
                 isScrolled
                   ? 'border-slate-200 text-slate-800 hover:bg-slate-100'
-                  : 'border-aruna-700 text-white hover:bg-aruna-800'
+                  : 'border-white/20 text-white hover:bg-white/10'
               }`}
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

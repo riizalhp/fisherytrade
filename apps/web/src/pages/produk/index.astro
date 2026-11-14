@@ -1,14 +1,14 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import ShopHeroSection from '../../components/ShopHeroSection';
-import ProductsSection from '../../components/ProductsSection';
-import { PRODUCTS } from '../../constants.tsx';
+import MarketplaceView from '../../components/marketplace/MarketplaceView';
+import { getMarketplaceProducts } from '../../lib/catalog-service.ts';
+
+const products = await getMarketplaceProducts();
 ---
 
 <Layout
-  title="Katalog Ikan Beku B2B & Ketersediaan Stok"
-  description="Katalog lengkap komoditas ikan dan hasil laut beku FisheryTrade: Yellowfin Tuna Loin, Kakap Merah, Cumi Tube, dan Udang Vaname untuk pasar horeka dan grosir lokal."
+  title="Marketplace Barang & Komoditas Perikanan B2B"
+  description="Katalog pasokan komoditas dan barang perikanan FisheryTrade untuk pasar horeka dan grosir lokal dengan transparansi harga terbuka per kg dan stok fisik langsung dari gudang distribusi Muara Baru, Brondong, dan Benoa."
 >
-  <ShopHeroSection />
-  <ProductsSection products={PRODUCTS} />
+  <MarketplaceView client:load products={products} />
 </Layout>

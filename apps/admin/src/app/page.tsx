@@ -34,7 +34,7 @@ export default function OverviewPage() {
     <div className="flex-1 flex flex-col">
       <Header
         title="Ringkasan Eksekutif & Kontrol WMS"
-        subtitle="Monitoring real-time multi-cold storage rantai dingin di 4 pelabuhan perikanan"
+        subtitle="Monitoring real-time gudang distribusi barang perikanan di 4 pelabuhan strategis"
       />
 
       <main className="p-6 space-y-6 max-w-7xl">
@@ -97,12 +97,12 @@ export default function OverviewPage() {
           </div>
         </div>
 
-        {/* Cold Storage Grid Status */}
+        {/* Warehouse Grid Status */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-base font-bold text-slate-900">Status 4 Cold Storage Terpadu</h3>
-              <p className="text-xs text-slate-500">Kapasitas, suhu rantai dingin, dan PIC operasional di lokasi</p>
+              <h3 className="text-base font-bold text-slate-900">Status 4 Gudang Distribusi Terpadu</h3>
+              <p className="text-xs text-slate-500">Kapasitas, standar mutu operasional, dan PIC di lokasi</p>
             </div>
             <Link
               href="/inventory"
@@ -144,8 +144,8 @@ export default function OverviewPage() {
 
                   <div className="pt-2 border-t border-slate-200 text-[11px] text-slate-600 space-y-1">
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Standar Suhu:</span>
-                      <span className="font-mono font-medium text-cyan-700">{cs.temperatureStandard}</span>
+                      <span className="text-slate-400">Standar Mutu:</span>
+                      <span className="font-mono font-medium text-emerald-700">{cs.temperatureStandard}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400">PIC Gudang:</span>

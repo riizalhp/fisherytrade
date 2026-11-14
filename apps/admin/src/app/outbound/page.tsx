@@ -89,7 +89,7 @@ export default function OutboundPage() {
               </div>
               <div>
                 <h3 className="text-base font-bold text-slate-900">Formulir Pengeluaran & Surat Jalan</h3>
-                <p className="text-xs text-slate-500">Pilih batch stok terlama (FIFO) untuk menjaga kualitas cold storage</p>
+                <p className="text-xs text-slate-500">Pilih batch stok terlama (FIFO) untuk menjaga kualitas barang perikanan</p>
               </div>
             </div>
 
@@ -184,7 +184,7 @@ export default function OutboundPage() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Plat Nomor Truk Pendingin</label>
+                  <label className="block font-semibold text-slate-700 mb-1">Plat Nomor Armada Truk / Kargo</label>
                   <input
                     type="text"
                     placeholder="B 9871 TXX"
@@ -221,20 +221,20 @@ export default function OutboundPage() {
           {/* Verification Protocol Box */}
           <div className="bg-slate-50 rounded-xl border border-slate-200 p-5 space-y-4">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">
-              Protokol Muat Cold Chain
+              Protokol Muat & Distribusi Pengiriman
             </h4>
             <div className="space-y-3 text-xs text-slate-600">
               <div className="p-3 bg-white rounded-lg border border-slate-200 space-y-1">
-                <div className="font-bold text-slate-800">Pre-Cooling Box Truk</div>
+                <div className="font-bold text-slate-800">Pemeriksaan Armada Angkutan</div>
                 <p className="text-[11px] text-slate-500">
-                  Armada truk reefer harus di-pre-cool minimal 2 jam hingga mencapai suhu di bawah -15°C sebelum palet dimuat.
+                  Armada kargo logistik harus diperiksa kebersihan dan kelayakannya sebelum palet dimuat.
                 </p>
               </div>
 
               <div className="p-3 bg-white rounded-lg border border-slate-200 space-y-1">
                 <div className="font-bold text-slate-800">Verifikasi Segel & Resi</div>
                 <p className="text-[11px] text-slate-500">
-                  Pastikan nomor segel kontainer dan resi Shipper tertera jelas pada cetakan Surat Jalan fisik.
+                  Pastikan nomor segel kemasan dan resi Shipper tertera jelas pada cetakan Surat Jalan fisik.
                 </p>
               </div>
             </div>

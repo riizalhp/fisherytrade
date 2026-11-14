@@ -20,7 +20,7 @@ const AboutSection: React.FC = () => {
             <div className="relative aspect-[4/3] sm:aspect-[0.85] rounded-3xl overflow-hidden shadow-2xl border border-aruna-700/60">
               <img
                 src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1000&q=80"
-                alt="Fasilitas Cold Storage Modern FisheryTrade"
+                alt="Sentra Gudang Distribusi Barang Perikanan FisheryTrade"
                 className="w-full h-full object-cover"
               />
               <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 bg-white/95 backdrop-blur-sm p-4 sm:p-5 rounded-2xl text-aruna-900 shadow-xl border border-slate-100 max-w-xs">
@@ -29,7 +29,7 @@ const AboutSection: React.FC = () => {
                   <span className="text-[11px] font-mono font-bold text-aruna-600 uppercase">Standar Mutu Nasional</span>
                 </div>
                 <h4 className="font-extrabold text-sm sm:text-base leading-snug">
-                  Suhu Terkunci -25°C dari Sumber ke Dapur Anda
+                  Standar Mutu Terjamin dari Sumber ke Dapur Anda
                 </h4>
               </div>
             </div>
@@ -42,11 +42,11 @@ const AboutSection: React.FC = () => {
             </span>
             
             <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold mb-6 tracking-tight leading-tight">
-              Menghadirkan Ikan Segar Berkualitas Standar Industri
+              Marketplace Barang Perikanan Berkualitas Standar Industri
             </h2>
             
             <p className="text-slate-200 text-sm sm:text-base mb-8 leading-relaxed">
-              Kami percaya kelezatan hidangan seafood dimulai dari integritas rantai dingin. FisheryTrade bekerja sama langsung dengan kelompok nelayan dan pembudidaya pesisir Indonesia untuk menghadirkan komoditas olahan laut higienis tanpa dehidrasi suhu bagi pelaku bisnis kuliner lokal.
+              Kami percaya kelezatan dan efisiensi bisnis kuliner dimulai dari keandalan pasokan barang perikanan. FisheryTrade bekerja sama langsung dengan sentra nelayan dan pembudidaya pesisir Indonesia untuk menghadirkan komoditas barang perikanan higienis dan terstandar bagi pelaku usaha kuliner dan grosir lokal.
             </p>
 
             <div className="space-y-5 mb-8">

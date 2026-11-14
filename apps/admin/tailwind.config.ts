@@ -8,7 +8,23 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-inter)', 'Inter', 'sans-serif'],
+      },
+      spacing: {
+        '120': '30rem',
+      },
       colors: {
+        background: 'rgb(var(--background-rgb, 248 250 252))',
+        foreground: 'rgb(var(--foreground-rgb, 15 23 42))',
+        card: {
+          DEFAULT: '#ffffff',
+          foreground: 'rgb(var(--foreground-rgb, 15 23 42))',
+        },
+        muted: {
+          DEFAULT: '#f1f5f9',
+          foreground: '#64748b',
+        },
         navy: {
           900: '#0B192C',
           800: '#1E3E62',

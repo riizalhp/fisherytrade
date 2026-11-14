@@ -3,24 +3,24 @@
 import React, { useState } from 'react';
 import { Header } from '../../components/layout/Header';
 import { INITIAL_COLD_STORAGES, INITIAL_COMMODITIES } from '../../lib/mock-data';
-import { ArrowDownToLine, CheckCircle2, QrCode, FileText, Thermometer } from 'lucide-react';
+import { ArrowDownToLine, CheckCircle2, QrCode, FileText, CheckCheck } from 'lucide-react';
 
 export default function InboundPage() {
   const [csId, setCsId] = useState('cs-jkt');
   const [supplier, setSupplier] = useState('');
   const [commodity, setCommodity] = useState('Tuna Sirip Kuning');
   const [processing, setProcessing] = useState('Loin');
-  const [freezing, setFreezing] = useState('IQF');
+  const [packaging, setPackaging] = useState('Kemasan Master Box');
   const [grade, setGrade] = useState('Grade A');
   const [weightKg, setWeightKg] = useState('');
-  const [temperature, setTemperature] = useState('-23.5');
+  const [qualityScore, setQualityScore] = useState('98/100 (Prima)');
   const [binLocation, setBinLocation] = useState('R-01-A1');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const cs = INITIAL_COLD_STORAGES.find((c) => c.id === csId);
-    const prefix = cs?.code.split('-')[0] || 'CS';
+    const prefix = cs?.code.split('-')[0] || 'GD';
     const randomDigits = Math.floor(1000 + Math.random() * 9000);
     const generatedBatchCode = `${prefix}-2611-${randomDigits}`;
 
@@ -39,7 +39,7 @@ export default function InboundPage() {
     <div className="flex-1 flex flex-col">
       <Header
         title="Penerimaan Barang (Goods Receipt / Inbound Nelayan)"
-        subtitle="Pencatatan hasil tangkapan kapal & supplier, verifikasi suhu rantai dingin, dan pembuatan nomor batch unik"
+        subtitle="Pencatatan barang perikanan dari kapal & supplier, verifikasi mutu standar, dan penerbitan nomor batch unik"
       />
 
       <main className="p-6 space-y-6 max-w-5xl">
@@ -66,7 +66,7 @@ export default function InboundPage() {
                 <ArrowDownToLine className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900">Formulir Penerimaan Ikan Baru</h3>
+                <h3 className="text-base font-bold text-slate-900">Formulir Penerimaan Barang Perikanan Baru</h3>
                 <p className="text-xs text-slate-500">Otomatis terhubung ke inventaris WMS dan penghitungan FIFO</p>
               </div>
             </div>
@@ -74,7 +74,7 @@ export default function InboundPage() {
             <form onSubmit={handleSubmit} className="space-y-4 text-xs">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Cold Storage Tujuan</label>
+                  <label className="block font-semibold text-slate-700 mb-1">Gudang Distribusi Tujuan</label>
                   <select
                     value={csId}
                     onChange={(e) => setCsId(e.target.value)}
@@ -103,7 +103,7 @@ export default function InboundPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Komoditas Ikan</label>
+                  <label className="block font-semibold text-slate-700 mb-1">Komoditas Barang Perikanan</label>
                   <select
                     value={commodity}
                     onChange={(e) => setCommodity(e.target.value)}
@@ -134,15 +134,15 @@ export default function InboundPage() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Metode Pembekuan</label>
+                  <label className="block font-semibold text-slate-700 mb-1">Kemasan & Mutu</label>
                   <select
-                    value={freezing}
-                    onChange={(e) => setFreezing(e.target.value)}
+                    value={packaging}
+                    onChange={(e) => setPackaging(e.target.value)}
                     className="w-full py-2 px-3 rounded-lg border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                   >
-                    <option value="IQF">IQF (Individual Quick Freezing)</option>
-                    <option value="Air Blast">Air Blast Freezing</option>
-                    <option value="Contact Plate">Contact Plate Freezer</option>
+                    <option value="Kemasan Master Box">Kemasan Master Box Standar</option>
+                    <option value="Kemasan Vakum Kedap Udara">Kemasan Vakum Kedap Udara</option>
+                    <option value="Curah Segar Terstandar">Curah Segar Terstandar</option>
                   </select>
                 </div>
               </div>
@@ -180,19 +180,19 @@ export default function InboundPage() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Uji Suhu Core Ikan (°C)</label>
+                  <label className="block font-semibold text-slate-700 mb-1">Hasil Uji Mutu / Standar KKP</label>
                   <div className="relative">
                     <input
                       type="text"
                       required
-                      placeholder="-22.5"
-                      value={temperature}
-                      onChange={(e) => setTemperature(e.target.value)}
+                      placeholder="98/100 (Prima)"
+                      value={qualityScore}
+                      onChange={(e) => setQualityScore(e.target.value)}
                       className="w-full py-2 pl-8 pr-3 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                     />
-                    <Thermometer className="w-3.5 h-3.5 text-cyan-600 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                    <CheckCheck className="w-3.5 h-3.5 text-emerald-600 absolute left-2.5 top-1/2 -translate-y-1/2" />
                   </div>
-                  <span className="text-[10px] text-slate-400 mt-0.5 block">Maksimal -18°C untuk cold chain</span>
+                  <span className="text-[10px] text-slate-400 mt-0.5 block">Parameter standar uji mutu penerimaan</span>
                 </div>
               </div>
 
@@ -223,27 +223,27 @@ export default function InboundPage() {
           {/* SOP Quality Check Sidebar */}
           <div className="bg-slate-50 rounded-xl border border-slate-200 p-5 space-y-4">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">
-              SOP Penerimaan Rantai Dingin
+              SOP Penerimaan Barang Perikanan
             </h4>
             <div className="space-y-3 text-xs text-slate-600">
               <div className="p-3 bg-white rounded-lg border border-slate-200 space-y-1">
-                <div className="font-bold text-slate-800">1. Pengecekan Suhu Inti</div>
+                <div className="font-bold text-slate-800">1. Pemeriksaan Fisik & Kesegaran</div>
                 <p className="text-[11px] text-slate-500">
-                  Suhu ikan beku saat pembongkaran palka kapal tidak boleh melebihi -18°C.
+                  Pemeriksaan fisik saat pembongkaran muatan kapal sesuai spesifikasi standar mutu.
                 </p>
               </div>
 
               <div className="p-3 bg-white rounded-lg border border-slate-200 space-y-1">
                 <div className="font-bold text-slate-800">2. Uji Histamin & Organoleptik</div>
                 <p className="text-[11px] text-slate-500">
-                  Mata jernih, insang segar, dan daging elastis tanpa tanda dehidrasi/freezer burn.
+                  Mata jernih, insang segar, tekstur kenyal, dan aroma khas laut segar.
                 </p>
               </div>
 
               <div className="p-3 bg-white rounded-lg border border-slate-200 space-y-1">
                 <div className="font-bold text-slate-800">3. Pelabelan Batch FIFO</div>
                 <p className="text-[11px] text-slate-500">
-                  Setiap palet langsung ditempel label barcode berformat <code>CS-YYMM-XXXX</code>.
+                  Setiap palet langsung ditempel label barcode berformat <code>GD-YYMM-XXXX</code>.
                 </p>
               </div>
             </div>

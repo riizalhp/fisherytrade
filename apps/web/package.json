@@ -13,6 +13,8 @@
   "dependencies": {
     "@astrojs/react": "^4.4.2",
     "astro": "^5.14.1",
+    "framer-motion": "^14.13.0",
+    "lucide-react": "^1.72.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
