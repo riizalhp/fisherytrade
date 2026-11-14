@@ -1,0 +1,14 @@
+---
+import Layout from '../layouts/Layout.astro';
+import TestimonialsHeroSection from '../components/TestimonialsHeroSection';
+import TestimonialsGrid from '../components/TestimonialsGrid';
+import { TESTIMONIALS } from '../constants.tsx';
+---
+
+<Layout
+  title="Testimoni Pelanggan"
+  description="Apa kata petani dan mitra tentang produk dan layanan PT. Triagro Hijrah Jaya."
+>
+  <TestimonialsHeroSection />
+  <TestimonialsGrid testimonials={TESTIMONIALS} />
+</Layout>

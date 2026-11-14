@@ -1,0 +1,14 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ShopHeroSection from '../../components/ShopHeroSection';
+import ProductsSection from '../../components/ProductsSection';
+import { PRODUCTS } from '../../constants.tsx';
+---
+
+<Layout
+  title="Katalog Ikan Beku B2B & Ketersediaan Stok"
+  description="Katalog lengkap komoditas ikan dan hasil laut beku FisheryTrade: Yellowfin Tuna Loin, Kakap Merah, Cumi Tube, dan Udang Vaname untuk pasar horeka dan grosir lokal."
+>
+  <ShopHeroSection />
+  <ProductsSection products={PRODUCTS} />
+</Layout>

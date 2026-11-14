@@ -1,0 +1,14 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ContactHeroSection from '../components/ContactHeroSection';
+import ContactSection from '../components/ContactSection';
+---
+
+<Layout
+  title="Hubungi Kami"
+  description="Hubungi PT. Triagro Hijrah Jaya untuk konsultasi pertanian, pemesanan produk, atau kemitraan."
+  hideCta
+>
+  <ContactHeroSection />
+  <ContactSection client:load />
+</Layout>

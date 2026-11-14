@@ -1,0 +1,97 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { CASE_STUDIES } from '../../constants.tsx';
+import type { CaseStudy } from '../../types.ts';
+
+export function getStaticPaths() {
+  return CASE_STUDIES.map((caseStudy) => ({
+    params: { id: caseStudy.id },
+    props: { caseStudy },
+  }));
+}
+
+const { caseStudy } = Astro.props as { caseStudy: CaseStudy };
+const otherStudies = CASE_STUDIES.filter((cs) => cs.id !== caseStudy.id).slice(0, 3);
+---
+
+<Layout title={caseStudy.title} description={caseStudy.problem} image={caseStudy.imageUrl} type="article">
+  <section class="relative flex items-center bg-[#0E2207] text-white pt-32 pb-16 sm:pt-36 sm:pb-20 lg:pt-48 lg:pb-32 px-4 sm:px-6 lg:px-8">
+    <div class="absolute inset-0">
+      <img src={caseStudy.imageUrl} alt="Latar Belakang Studi Kasus" class="w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-gradient-to-r from-[#0e2207] to-[#0e2207]/40"></div>
+    </div>
+    <div class="relative z-10 w-full max-w-7xl mx-auto">
+      <div class="max-w-4xl text-left">
+        <span class="inline-block py-2 px-4 border border-[#FBC91A] rounded-full text-sm font-semibold text-[#FBC91A] mb-4">
+          {caseStudy.category}
+        </span>
+        <h1 class="text-5xl sm:text-6xl lg:text-7xl font-semibold leading-tight tracking-tighter">
+          {caseStudy.title}
+        </h1>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-10 lg:gap-16">
+      <div class="lg:w-2/3">
+        <article>
+          <div class="mb-12">
+            <h2 class="text-3xl font-bold text-[#0E2207] mb-4">Tantangan</h2>
+            <p class="text-lg text-gray-600">{caseStudy.problem}</p>
+          </div>
+          <div class="mb-12">
+            <h2 class="text-3xl font-bold text-[#0E2207] mb-4">Solusi Triagro</h2>
+            <p class="text-lg text-gray-600">{caseStudy.solution}</p>
+          </div>
+
+          <div class="mb-12">
+            <h2 class="text-3xl font-bold text-[#0E2207] mb-6">Hasil yang Dicapai</h2>
+            <div class="grid sm:grid-cols-2 gap-6">
+              {caseStudy.results.map((result) => (
+                <div class="bg-[#1f6306]/10 p-6 rounded-2xl">
+                  <div class="text-5xl font-bold text-[#1f6306] mb-2">{result.value}</div>
+                  <h4 class="text-xl font-bold text-[#0e2207] mb-2">{result.title}</h4>
+                  <p class="text-gray-600">{result.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div class="case-study-content" set:html={caseStudy.content} />
+        </article>
+      </div>
+
+      <aside class="lg:w-1/3">
+        <div class="sticky top-28 space-y-8">
+          <div class="bg-[#fef4d1] rounded-2xl p-8 text-[#0e2207]">
+            <h3 class="text-2xl font-bold mb-4">Testimoni Klien</h3>
+            <p class="text-lg italic mb-4">&ldquo;{caseStudy.testimonial.quote}&rdquo;</p>
+            <p class="font-bold">{caseStudy.testimonial.name}</p>
+            <p class="text-sm text-gray-600">{caseStudy.testimonial.role}</p>
+          </div>
+
+          <div class="bg-[#0e2207] rounded-2xl p-8">
+            <h3 class="text-2xl font-bold text-white mb-6">Studi Kasus Lainnya</h3>
+            <div class="space-y-6">
+              {otherStudies.map((cs) => (
+                <a href={`/studi-kasus/${cs.id}`} class="flex items-center gap-4 group">
+                  <img
+                    src={cs.imageUrl}
+                    alt={cs.title}
+                    class="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                  />
+                  <div>
+                    <h4 class="font-bold text-white group-hover:text-[#FBC91A] transition-colors leading-tight">
+                      {cs.title}
+                    </h4>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+</Layout>

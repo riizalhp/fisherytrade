@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fishery Trade — Design Guideline & UI Preview (Aruna Coastal Blue Edition)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            // Aruna Coastal Blue Palette (Resmi diambil dari brand & kaos lapangan Aruna)
+            aruna: {
+              50: '#F0F7FD',
+              100: '#DDF0FC',
+              200: '#BCE2FA',
+              300: '#86CAF5',
+              400: '#3AA7EB',
+              500: '#008AE0',
+              600: '#006AAF', // << WARNA BIRU KAOS / LOGO UTAMA ARUNA INDONESIA
+              700: '#00558F',
+              800: '#004372',
+              900: '#0A2540', // Deep Marine untuk tipografi kontras tinggi (bukan dongker kusam)
+              950: '#051628',
+            },
+            coral: {
+              50: '#FFF7ED',
+              100: '#FFEDD5',
+              500: '#F97316',
+              600: '#F37125', // Aksen jingga Aruna / Fishery CTA
+              700: '#C2410C',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbar & crisp border feel */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #F1F5F9; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #006AAF; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- TOP BRAND HEADER (Aruna Coastal Blue) -->
+  <header class="bg-aruna-600 text-white border-b border-aruna-700 sticky top-0 z-40 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- Brand Logo -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 bg-white text-aruna-600 rounded-xl flex items-center justify-center shadow-md p-1 border border-aruna-500/30">
+          <img src="apps/web/public/logo.png" alt="FisheryTrade Logo" class="w-full h-full object-contain" />
+        </div>
+        <div>
+          <span class="text-xl font-extrabold tracking-tight">FISHERY<span class="text-aruna-100">TRADE</span></span>
+          <span class="hidden sm:inline-block ml-3 px-2 py-0.5 text-[10px] font-mono tracking-wider uppercase bg-aruna-700 text-white rounded border border-aruna-500 shadow-inner">Aruna Coastal Blue Edition</span>
+        </div>
+      </div>
+
+      <!-- Navigation & Language Selector -->
+      <div class="flex items-center space-x-4">
+        <!-- Interactive View Switcher -->
+        <div class="hidden md:flex bg-aruna-700/80 p-1 rounded-lg border border-aruna-800 text-xs font-medium">
+          <button onclick="switchTab('design-tokens')" id="tab-btn-tokens" class="px-3.5 py-1.5 rounded-md bg-white text-aruna-700 font-bold shadow-sm transition-all">1. Design Guidelines</button>
+          <button onclick="switchTab('catalog-preview')" id="tab-btn-catalog" class="px-3.5 py-1.5 rounded-md text-aruna-100 hover:text-white transition-all">2. B2B Multi-Gudang Catalog</button>
+          <button onclick="switchTab('wms-preview')" id="tab-btn-wms" class="px-3.5 py-1.5 rounded-md text-aruna-100 hover:text-white transition-all">3. Admin WMS "SAP-Lite"</button>
+        </div>
+
+        <!-- Language Switcher -->
+        <div class="flex items-center bg-aruna-700 rounded-md border border-aruna-500 p-0.5 text-xs font-mono">
+          <button class="px-2 py-1 bg-white text-aruna-700 rounded font-bold shadow-xs">ID</button>
+          <button class="px-2 py-1 text-aruna-100 hover:text-white">EN</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- SUBHEADER INFO BANNER -->
+  <div class="bg-white border-b border-slate-200 py-3 px-4 sm:px-6 shadow-xs">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-2">
+      <div class="flex items-center space-x-2 text-slate-700">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="font-bold text-aruna-900">Palet Terapan:</span>
+        <span class="text-slate-600">Biru Maritim Aruna (<code class="bg-aruna-50 text-aruna-700 px-1.5 py-0.5 rounded font-mono font-bold">#006AAF</code>) — Terang, segar, berenergi pesisir, & bukan dongker gelap kusam.</span>
+      </div>
+      <div class="flex items-center space-x-2 text-slate-500 font-mono text-[11px]">
+        <span>Pola Desain: shadcn/ui Component Primitives</span>
+        <span>•</span>
+        <span class="text-aruna-600 font-semibold">Light Mode Default (Clean & Hygienic)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+
+    <!-- ============================================================== -->
+    <!-- SECTION 1: DESIGN TOKENS & SHADCN/UI GUIDELINES -->
+    <!-- ============================================================== -->
+    <div id="section-design-tokens" class="space-y-10">
+
+      <!-- Intro Card -->
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-48 h-48 bg-aruna-50 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none"></div>
+        <div class="relative z-10">
+          <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-aruna-50 text-aruna-700 border border-aruna-200 mb-3">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 mr-1 text-aruna-600"></i> Standar Visual B2B Maritim Indonesia
+          </div>
+          <h2 class="text-2xl font-extrabold text-aruna-900 mb-2">Design Guidelines: Vibrant Coastal Blue & Precision Cold-Chain</h2>
+          <p class="text-sm text-slate-600 max-w-4xl leading-relaxed">
+            Sesuai arahan, kami membuang biru dongker gelap (<em>dark midnight navy</em>) yang terasa terlalu korporat/kaku. 
+            Sebagai gantinya, kami menggunakan <strong>Biru Maritim Aruna (<code class="text-aruna-600 font-mono font-bold">#006AAF</code>)</strong>—warna biru khas kaos polo dan identitas lapangan Aruna Indonesia yang sangat segar, hidup, dan identik dengan laut nusantara.
+            Dipadukan dengan struktur komponen <strong>shadcn/ui</strong> untuk katalog multi-gudang dan tabel audit WMS.
+          </p>
+        </div>
+      </div>
+
+      <!-- Color Palette Tokens -->
+      <div>
+        <h3 class="text-lg font-bold text-aruna-900 mb-4 flex items-center space-x-2">
+          <i data-lucide="palette" class="w-5 h-5 text-aruna-600"></i>
+          <span>Semantic Color Palette (Aruna Ocean Identity)</span>
+        </h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <!-- Primary Aruna Blue -->
+          <div class="bg-white p-4 rounded-xl border-2 border-aruna-500 shadow-sm space-y-2 relative">
+            <div class="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">Primary</div>
+            <div class="h-16 rounded-lg bg-aruna-600 flex items-end p-2.5 text-white font-mono text-xs font-bold shadow-inner">#006AAF</div>
+            <div>
+              <div class="font-bold text-xs text-aruna-900">Aruna Coastal Blue</div>
+              <div class="text-[11px] text-slate-500 font-mono">bg-aruna-600 / primary</div>
+              <div class="text-[11px] text-aruna-700 font-medium mt-1">Warna Kaos & Logo Aruna. Segar, maritim, berwibawa tapi ramah.</div>
+            </div>
+          </div>
+
+          <!-- Deep Marine Navy (Teks & Struktur) -->
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-2">
+            <div class="h-16 rounded-lg bg-aruna-900 flex items-end p-2.5 text-white font-mono text-xs font-bold shadow-inner">#0A2540</div>
+            <div>
+              <div class="font-bold text-xs text-aruna-900">Deep Marine Slate</div>
+              <div class="text-[11px] text-slate-500 font-mono">bg-aruna-900 / dark-contrast</div>
+              <div class="text-[11px] text-slate-500 mt-1">Tipografi judul, header tabel, teks kontras tinggi.</div>
+            </div>
+          </div>
+
+          <!-- Action Vitality Coral -->
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-2">
+            <div class="h-16 rounded-lg bg-coral-600 flex items-end p-2.5 text-white font-mono text-xs font-bold shadow-inner">#F37125</div>
+            <div>
+              <div class="font-bold text-xs text-slate-900">Vitality Coral Action</div>
+              <div class="text-[11px] text-slate-500 font-mono">bg-coral-600 / accent-cta</div>
+              <div class="text-[11px] text-slate-500 mt-1">Tombol Pesan, RFQ, Konversi Cepat (Aksen Resmi Aruna).</div>
+            </div>
+          </div>
+
+          <!-- Frost Ice White -->
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-2">
+            <div class="h-16 rounded-lg bg-aruna-50 border border-aruna-100 flex items-end p-2.5 text-aruna-700 font-mono text-xs font-bold shadow-inner">#F0F7FD</div>
+            <div>
+              <div class="font-bold text-xs text-slate-900">Frost Ice Canvas</div>
+              <div class="text-[11px] text-slate-500 font-mono">bg-aruna-50 / cold-badge</div>
+              <div class="text-[11px] text-slate-500 mt-1">Badge cold storage -25°C, background data dingin & higienis.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Typography Scale -->
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <h3 class="text-lg font-bold text-aruna-900 flex items-center space-x-2">
+          <i data-lucide="type" class="w-5 h-5 text-aruna-600"></i>
+          <span>Typography & Tabular Numbers (Plus Jakarta Sans + JetBrains Mono)</span>
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+          <div class="space-y-3">
+            <div>
+              <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">H1 — Page Hero Title (36px Bold)</span>
+              <div class="text-3xl font-extrabold text-aruna-900 tracking-tight">Katalog Ekspor & Cold Storage</div>
+            </div>
+            <div>
+              <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">H2 — Section Title (24px Semibold)</span>
+              <div class="text-2xl font-bold text-aruna-900">Ketersediaan Stok Ikan Multi-Gudang</div>
+            </div>
+            <div>
+              <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">H3 — Card Product Title (18px Semibold)</span>
+              <div class="text-lg font-semibold text-slate-900">Yellowfin Tuna Loin — Grade A Ekspor</div>
+            </div>
+          </div>
+          <div class="space-y-3 bg-aruna-50/60 p-4 rounded-xl border border-aruna-100">
+            <span class="text-[10px] font-mono text-aruna-700 uppercase tracking-wider font-bold flex items-center">
+              <i data-lucide="scale" class="w-3.5 h-3.5 mr-1 text-aruna-600"></i> Tabular Figures (WMS Tonase & Suhu)
+            </span>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Angka inventori wajib menggunakan font mono/tabular figures agar nilai timbangan tidak bergeser di tabel saat angka bertambah/berkurang:
+            </p>
+            <div class="space-y-1.5 font-mono">
+              <div class="text-xl font-bold text-emerald-600">4.500 kg <span class="text-xs font-sans text-slate-500 font-normal">(4,5 Ton Ready Stock)</span></div>
+              <div class="text-sm font-semibold text-aruna-600">Suhu Cold Storage: -25.4°C</div>
+              <div class="text-xs text-slate-500">Nomor Batch: BTCH-202611-YFT-001</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- shadcn/ui Component Primitives -->
+      <div>
+        <h3 class="text-lg font-bold text-aruna-900 mb-4 flex items-center space-x-2">
+          <i data-lucide="layers" class="w-5 h-5 text-aruna-600"></i>
+          <span>shadcn/ui Custom Primitives (Aruna Edition)</span>
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+          <!-- Buttons -->
+          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+            <div class="text-xs font-bold text-aruna-900 border-b border-slate-100 pb-2">Button Variants</div>
+            <div class="space-y-2">
+              <button class="w-full bg-coral-600 hover:bg-coral-700 text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-sm flex items-center justify-center space-x-2 transition-colors">
+                <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                <span>Pesan dari Gudang (Primary CTA)</span>
+              </button>
+              <button class="w-full bg-aruna-600 hover:bg-aruna-700 text-white text-xs font-medium px-4 py-2.5 rounded-lg shadow-sm flex items-center justify-center space-x-2 transition-colors">
+                <i data-lucide="file-text" class="w-4 h-4"></i>
+                <span>Minta Penawaran (RFQ)</span>
+              </button>
+              <button class="w-full bg-white hover:bg-aruna-50 text-aruna-700 border border-aruna-200 text-xs font-medium px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors">
+                <i data-lucide="download" class="w-4 h-4 text-aruna-600"></i>
+                <span>Unduh Spesifikasi (PDF)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Badges -->
+          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+            <div class="text-xs font-bold text-aruna-900 border-b border-slate-100 pb-2">Status & Cold-Chain Badges</div>
+            <div class="flex flex-wrap gap-2 pt-1">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>Ready Stock
+              </span>
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5"></span>Menipis (&lt;500 kg)
+              </span>
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200">
+                Stok Habis
+              </span>
+              <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-mono font-bold bg-aruna-50 text-aruna-700 border border-aruna-200">
+                <i data-lucide="snowflake" class="w-3.5 h-3.5 mr-1 text-aruna-600"></i>IQF -25°C
+              </span>
+              <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                HACCP Certified
+              </span>
+              <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-aruna-100/70 text-aruna-800 border border-aruna-200">
+                KKP Grade A
+              </span>
+            </div>
+          </div>
+
+          <!-- Form Inputs -->
+          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+            <div class="text-xs font-bold text-aruna-900 border-b border-slate-100 pb-2">Form Controls</div>
+            <div class="space-y-2">
+              <div>
+                <label class="block text-[11px] font-medium text-slate-700 mb-1">Titik Cold Storage Pengambilan</label>
+                <select class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-aruna-600">
+                  <option>Cold Storage Muara Baru (Jakarta) — 4.500 kg Ready</option>
+                  <option>Cold Storage Brondong (Lamongan) — 2.200 kg Ready</option>
+                  <option>Cold Storage Benoa (Bali) — Habis</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-medium text-slate-700 mb-1">Kuantitas Pemesanan (kg)</label>
+                <input type="number" value="500" class="w-full font-mono text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-aruna-600">
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- SECTION 2: B2B MULTI-WAREHOUSE CATALOG PREVIEW -->
+    <!-- ============================================================== -->
+    <div id="section-catalog-preview" class="space-y-6 hidden">
+
+      <!-- Header & Filter Bar -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-aruna-900">Katalog Komoditas Perikanan & Stok Multi-Gudang</h2>
+            <p class="text-xs text-slate-500">Pilih ikan beku bersertifikasi ekspor dan cek ketersediaan tonase langsung per titik fasilitas cold storage.</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="text-xs text-slate-500 font-medium">Mode Harga:</span>
+            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-mono font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+              ✓ Harga Terbuka (IDR / kg)
+            </span>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-100">
+          <div>
+            <label class="block text-[11px] font-medium text-slate-600 mb-1">Kategori Komoditas</label>
+            <select class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 bg-slate-50">
+              <option>Semua Kategori (Tuna, Kakap, Cumi, Udang)</option>
+              <option>Ikan Pelagis (Tuna, Cakalang, Tongkol)</option>
+              <option>Ikan Demersal (Kakap Merah, Kerapu)</option>
+              <option>Chepalopoda (Cumi-cumi, Gurita)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-slate-600 mb-1">Pilih Lokasi Cold Storage</label>
+            <select class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 bg-slate-50">
+              <option>Semua Lokasi Fasilitas</option>
+              <option>📍 Jakarta — Muara Baru</option>
+              <option>📍 Jawa Timur — Brondong (Lamongan)</option>
+              <option>📍 Bali — Pelabuhan Benoa</option>
+              <option>📍 Sulawesi Utara — Bitung</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-slate-600 mb-1">Metode Pembekuan</label>
+            <select class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 bg-slate-50">
+              <option>Semua Metode (IQF / Air Blast / Block)</option>
+              <option>IQF (Individually Quick Frozen) -25°C</option>
+              <option>Air Blast Frozen (-30°C)</option>
+              <option>Block Frozen</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-slate-600 mb-1">Pencarian Cepat</label>
+            <div class="relative">
+              <input type="text" placeholder="Cari nama komoditas..." class="w-full text-xs border border-slate-200 rounded-lg pl-8 pr-3 py-2">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-3"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Cards Grid (Fulton Freshness + Seafood Souq Precision) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Card 1: Yellowfin Tuna Loin -->
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
+          <!-- Image Header with Badges -->
+          <div class="relative h-48 bg-slate-100 overflow-hidden group">
+            <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=700&q=80" alt="Yellowfin Tuna Loin" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <div class="absolute top-2 left-2 flex flex-col gap-1">
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-aruna-600 text-white shadow-xs">
+                <i data-lucide="snowflake" class="w-3 h-3 mr-1 text-aruna-100"></i>IQF -25°C
+              </span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500 text-white shadow-xs">
+                Grade A (Sashimi Ready)
+              </span>
+            </div>
+            <div class="absolute bottom-2 right-2">
+              <span class="px-2.5 py-1 rounded-md bg-white/95 text-aruna-900 text-xs font-mono font-bold shadow-sm border border-slate-100">
+                Rp 95.000 / kg
+              </span>
+            </div>
+          </div>
+
+          <!-- Body -->
+          <div class="p-5 flex-1 flex flex-col justify-between">
+            <div>
+              <div class="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Thunnus albacares</div>
+              <h3 class="text-base font-bold text-aruna-900 mt-0.5">Yellowfin Tuna Loin Beku</h3>
+              <p class="text-xs text-slate-500 mt-1">Potongan Loin tanpa kulit & tulang, kemasan vakum 2kg. Sertifikasi HACCP & KKP.</p>
+              <div class="text-[11px] text-slate-400 mt-1 font-mono">Min. Order: 100 kg</div>
+
+              <!-- Multi-Warehouse Stock Breakdown (Fitur Kunci) -->
+              <div class="mt-4 pt-3 border-t border-slate-100 space-y-2">
+                <div class="text-[11px] font-bold text-slate-700 flex justify-between items-center">
+                  <span>Ketersediaan di Titik Gudang:</span>
+                  <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-mono text-[10px] font-bold">Total: 6.700 kg</span>
+                </div>
+                
+                <div class="space-y-1.5 text-xs">
+                  <div class="flex justify-between items-center p-2 rounded-lg bg-slate-50 border border-slate-100">
+                    <span class="flex items-center text-slate-700">
+                      <i data-lucide="map-pin" class="w-3.5 h-3.5 text-aruna-600 mr-1.5"></i>
+                      <span>CS Muara Baru (Jakarta)</span>
+                    </span>
+                    <span class="font-mono font-bold text-emerald-600">4.500 kg <span class="text-[10px] font-normal text-slate-400">Ready</span></span>
+                  </div>
+                  <div class="flex justify-between items-center p-2 rounded-lg bg-slate-50 border border-slate-100">
+                    <span class="flex items-center text-slate-700">
+                      <i data-lucide="map-pin" class="w-3.5 h-3.5 text-aruna-600 mr-1.5"></i>
+                      <span>CS Brondong (Lamongan)</span>
+                    </span>
+                    <span class="font-mono font-bold text-emerald-600">2.200 kg <span class="text-[10px] font-normal text-slate-400">Ready</span></span>
+                  </div>
+                  <div class="flex justify-between items-center p-2 rounded-lg bg-slate-50/50 border border-slate-100 text-slate-400">
+                    <span class="flex items-center">
+                      <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-300 mr-1.5"></i>
+                      <span>CS Benoa (Bali)</span>
+                    </span>
+                    <span class="font-mono italic text-[11px] text-rose-500">Stok Habis</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CTA Action -->
+            <div class="mt-5 pt-3 border-t border-slate-100">
+              <button onclick="openOrderModal('Yellowfin Tuna Loin', 95000)" class="w-full bg-coral-600 hover:bg-coral-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm flex items-center justify-center space-x-2 transition-colors">
+                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                <span>Pesan dari Gudang Terdekat</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Kakap Merah Utuh (Red Snapper) -->
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
+          <div class="relative h-48 bg-slate-100 overflow-hidden group">
+            <img src="https://images.unsplash.com/photo-1534939561126-855b8675edd7?auto=format&fit=crop&w=700&q=80" alt="Kakap Merah Utuh" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <div class="absolute top-2 left-2 flex flex-col gap-1">
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-aruna-600 text-white shadow-xs">
+                <i data-lucide="snowflake" class="w-3 h-3 mr-1 text-aruna-100"></i>Air Blast -30°C
+              </span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-aruna-700 text-white shadow-xs">
+                Grade A (Gilled & Gutted)
+              </span>
+            </div>
+            <div class="absolute bottom-2 right-2">
+              <span class="px-2.5 py-1 rounded-md bg-white/95 text-aruna-900 text-xs font-mono font-bold shadow-sm border border-slate-100">
+                Rp 78.000 / kg
+              </span>
+            </div>
+          </div>
+
+          <div class="p-5 flex-1 flex flex-col justify-between">
+            <div>
+              <div class="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Lutjanus campechanus</div>
+              <h3 class="text-base font-bold text-aruna-900 mt-0.5">Kakap Merah Utuh Beku</h3>
+              <p class="text-xs text-slate-500 mt-1">Ukuran 1-2 kg per ekor, insang & isi perut dibersihkan. Cocok untuk horeka & distributor.</p>
+              <div class="text-[11px] text-slate-400 mt-1 font-mono">Min. Order: 200 kg</div>
+
+              <div class="mt-4 pt-3 border-t border-slate-100 space-y-2">
+                <div class="text-[11px] font-bold text-slate-700 flex justify-between items-center">
+                  <span>Ketersediaan di Titik Gudang:</span>
+                  <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-mono text-[10px] font-bold">Total: 4.800 kg</span>
+                </div>
+                
+                <div class="space-y-1.5 text-xs">
+                  <div class="flex justify-between items-center p-2 rounded-lg bg-slate-50 border border-slate-100">
+                    <span class="flex items-center text-slate-700">
+                      <i data-lucide="map-pin" class="w-3.5 h-3.5 text-aruna-600 mr-1.5"></i>
+                      <span>CS Muara Baru (Jakarta)</span>
+                    </span>
+                    <span class="font-mono font-bold text-emerald-600">3.000 kg <span class="text-[10px] font-normal text-slate-400">Ready</span></span>
+                  </div>
+                  <div class="flex justify-between items-center p-2 rounded-lg bg-slate-50 border border-slate-100">
+                    <span class="flex items-center text-slate-700">
+                      <i data-lucide="map-pin" class="w-3.5 h-3.5 text-aruna-600 mr-1.5"></i>
+                      <span>CS Brondong (Lamongan)</span>
+                    </span>
+                    <span class="font-mono font-bold text-amber-600">300 kg <span class="text-[10px] font-normal text-amber-600">Menipis</span></span>
+                  </div>
+                  <div class="flex justify-between items-center p-2 rounded-lg bg-slate-50 border border-slate-100">
+                    <span class="flex items-center text-slate-700">
+                      <i data-lucide="map-pin" class="w-3.5 h-3.5 text-aruna-600 mr-1.5"></i>
+                      <span>CS Benoa (Bali)</span>
+                    </span>
+                    <span class="font-mono font-bold text-emerald-600">1.500 kg <span class="text-[10px] font-normal text-slate-400">Ready</span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-5 pt-3 border-t border-slate-100">
+              <button onclick="openOrderModal('Kakap Merah Utuh', 78000)" class="w-full bg-coral-600 hover:bg-coral-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm flex items-center justify-center space-x-2 transition-colors">
+                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                <span>Pesan dari Gudang Terdekat</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Cumi Tube Beku (Squid Tube) -->
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
+          <div class="relative h-48 bg-slate-100 overflow-hidden group">
+            <img src="https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=700&q=80" alt="Cumi Tube Beku" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <div class="absolute top-2 left-2 flex flex-col gap-1">
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-aruna-600 text-white shadow-xs">
+                <i data-lucide="snowflake" class="w-3 h-3 mr-1 text-aruna-100"></i>IQF -25°C
+              </span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-700 text-white shadow-xs">
+                Skinless & Cleaned
+              </span>
+            </div>
+            <div class="absolute bottom-2 right-2">
+              <span class="px-2.5 py-1 rounded-md bg-white/95 text-aruna-900 text-xs font-mono font-bold shadow-sm border border-slate-100">
+                Rp 85.000 / kg
+              </span>
+            </div>
+          </div>
+
+          <div class="p-5 flex-1 flex flex-col justify-between">
+            <div>
+              <div class="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Loligo edulis</div>
+              <h3 class="text-base font-bold text-aruna-900 mt-0.5">Cumi Tube Kupas Bersih</h3>
+              <p class="text-xs text-slate-500 mt-1">Cumi tabung bersih tanpa kulit & sayap, glazing 10%. Standar restoran seafood & pabrik.</p>
+              <div class="text-[11px] text-slate-400 mt-1 font-mono">Min. Order: 150 kg</div>
+
+              <div class="mt-4 pt-3 border-t border-slate-100 space-y-2">
+                <div class="text-[11px] font-bold text-slate-700 flex justify-between items-center">
+                  <span>Ketersediaan di Titik Gudang:</span>
+                  <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-mono text-[10px] font-bold">Total: 5.200 kg</span>
+                </div>
+                
+                <div class="space-y-1.5 text-xs">
+                  <div class="flex justify-between items-center p-2 rounded-lg bg-slate-50 border border-slate-100">
+                    <span class="flex items-center text-slate-700">
+                      <i data-lucide="map-pin" class="w-3.5 h-3.5 text-aruna-600 mr-1.5"></i>
+                      <span>CS Muara Baru (Jakarta)</span>
+                    </span>
+                    <span class="font-mono font-bold text-emerald-600">1.800 kg <span class="text-[10px] font-normal text-slate-400">Ready</span></span>
+                  </div>
+                  <div class="flex justify-between items-center p-2 rounded-lg bg-slate-50 border border-slate-100">
+                    <span class="flex items-center text-slate-700">
+                      <i data-lucide="map-pin" class="w-3.5 h-3.5 text-aruna-600 mr-1.5"></i>
+                      <span>CS Brondong (Lamongan)</span>
+                    </span>
+                    <span class="font-mono font-bold text-emerald-600">3.400 kg <span class="text-[10px] font-normal text-slate-400">Ready</span></span>
+                  </div>
+                  <div class="flex justify-between items-center p-2 rounded-lg bg-slate-50/50 border border-slate-100 text-slate-400">
+                    <span class="flex items-center">
+                      <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-300 mr-1.5"></i>
+                      <span>CS Benoa (Bali)</span>
+                    </span>
+                    <span class="font-mono italic text-[11px] text-rose-500">Stok Habis</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-5 pt-3 border-t border-slate-100">
+              <button onclick="openOrderModal('Cumi Tube Kupas Bersih', 85000)" class="w-full bg-coral-600 hover:bg-coral-700 text-white text-xs font-semibold py-2.5 rounded-lg shadow-sm flex items-center justify-center space-x-2 transition-colors">
+                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                <span>Pesan dari Gudang Terdekat</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- SECTION 3: ADMIN DASHBOARD "SAP-LITE" & WMS PREVIEW -->
+    <!-- ============================================================== -->
+    <div id="section-wms-preview" class="space-y-6 hidden">
+
+      <!-- Executive Metric Bar -->
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="text-[11px] font-medium text-slate-500">Total Stok Lintas Gudang</div>
+          <div class="text-2xl font-extrabold text-aruna-900 font-mono mt-1">16.700 <span class="text-sm font-sans font-normal text-slate-500">kg (16,7 Ton)</span></div>
+          <div class="text-[11px] text-emerald-600 mt-1 flex items-center"><i data-lucide="trending-up" class="w-3 h-3 mr-1"></i>+2.400 kg masuk hari ini</div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="text-[11px] font-medium text-slate-500">Cold Storage Aktif</div>
+          <div class="text-2xl font-extrabold text-aruna-900 font-mono mt-1">3 <span class="text-sm font-sans font-normal text-slate-500">Lokasi Fasilitas</span></div>
+          <div class="text-[11px] text-aruna-600 font-medium mt-1">Muara Baru, Brondong, Benoa</div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="text-[11px] font-medium text-slate-500">Aging Stock Alert (FIFO)</div>
+          <div class="text-2xl font-extrabold text-amber-600 font-mono mt-1">1 Batch <span class="text-sm font-sans font-normal text-slate-500">(&gt;45 Hari)</span></div>
+          <div class="text-[11px] text-amber-700 mt-1 font-medium">Prioritas jual: Kakap Brondong</div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="text-[11px] font-medium text-slate-500">Order Terhubung Shipper.id</div>
+          <div class="text-2xl font-extrabold text-coral-600 font-mono mt-1">4 Truk <span class="text-sm font-sans font-normal text-slate-500">Dalam Perjalanan</span></div>
+          <div class="text-[11px] text-slate-500 mt-1">Tracking posisi live via GPS</div>
+        </div>
+      </div>
+
+      <!-- Action Bar: 1-Click WhatsApp Blast (Aruna Coastal Blue Bar) -->
+      <div class="bg-aruna-600 text-white p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md border border-aruna-700">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-xl bg-white text-aruna-600 flex items-center justify-center font-bold shadow-sm">
+            <i data-lucide="message-circle" class="w-5 h-5 text-emerald-600"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-white">1-Click Daily Stock Blast untuk WhatsApp</div>
+            <div class="text-[11px] text-aruna-100">Salin otomatis seluruh rangkuman stok ready hari ini ke format pesan teks grup pelanggan & broker.</div>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2 w-full sm:w-auto">
+          <button onclick="copyWABlast()" class="w-full sm:w-auto px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-bold rounded-lg flex items-center justify-center space-x-1.5 transition-colors shadow-sm">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span id="btn-copy-text">Salin Teks WA Hari Ini</span>
+          </button>
+          <button class="w-full sm:w-auto px-4 py-2 bg-aruna-700 hover:bg-aruna-800 text-white text-xs font-medium rounded-lg border border-aruna-500 flex items-center justify-center space-x-1.5 transition-colors">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+            <span>Cetak PDF</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- WMS Stock Opname Sheet (Table) -->
+      <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+        <div class="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 class="font-bold text-sm text-aruna-900">Lembar Audit Stock Opname (SAP-Lite Workflow)</h3>
+            <p class="text-xs text-slate-500">Pencocokan stok fisik di ruang beku dengan catatan sistem beserta kode alasan selisih.</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button class="px-3 py-1.5 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium border border-slate-200 flex items-center space-x-1 transition-colors">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>Input Ikan Masuk (GR)</span>
+            </button>
+            <button class="px-3 py-1.5 text-xs bg-aruna-600 hover:bg-aruna-700 text-white rounded-lg font-medium flex items-center space-x-1 transition-colors shadow-xs">
+              <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+              <span>Simpan Audit Stok</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+              <tr>
+                <th class="p-3">No. Batch</th>
+                <th class="p-3">Komoditas & Potongan</th>
+                <th class="p-3">Lokasi Fasilitas</th>
+                <th class="p-3">Tgl Masuk Beku</th>
+                <th class="p-3 text-right">Stok Sistem (kg)</th>
+                <th class="p-3 text-right">Hitung Fisik (kg)</th>
+                <th class="p-3 text-right">Selisih</th>
+                <th class="p-3">Alasan Selisih (Reason Code)</th>
+                <th class="p-3 text-center">Status FIFO</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <!-- Row 1 -->
+              <tr class="hover:bg-slate-50/80">
+                <td class="p-3 font-mono font-bold text-aruna-700">BTCH-YFT-001</td>
+                <td class="p-3">
+                  <div class="font-semibold text-slate-900">Yellowfin Tuna Loin</div>
+                  <div class="text-[11px] text-slate-500">Grade A • IQF -25°C</div>
+                </td>
+                <td class="p-3 text-slate-700">CS Muara Baru (Jakarta)</td>
+                <td class="p-3 font-mono text-slate-600">01 Nov 2026</td>
+                <td class="p-3 text-right font-mono font-bold text-slate-900">4.500</td>
+                <td class="p-3 text-right">
+                  <input type="number" value="4500" class="w-20 text-right font-mono text-xs border border-slate-200 rounded px-1.5 py-1 bg-white">
+                </td>
+                <td class="p-3 text-right font-mono text-slate-400">0</td>
+                <td class="p-3 text-slate-400 text-[11px]">Sesuai (Match)</td>
+                <td class="p-3 text-center">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">Aman (12 Hari)</span>
+                </td>
+              </tr>
+
+              <!-- Row 2 (With Variance) -->
+              <tr class="bg-amber-50/40 hover:bg-amber-50/70">
+                <td class="p-3 font-mono font-bold text-aruna-700">BTCH-RSN-004</td>
+                <td class="p-3">
+                  <div class="font-semibold text-slate-900">Kakap Merah Utuh</div>
+                  <div class="text-[11px] text-slate-500">Grade A • Air Blast -30°C</div>
+                </td>
+                <td class="p-3 text-slate-700">CS Brondong (Lamongan)</td>
+                <td class="p-3 font-mono text-slate-600">22 Sep 2026</td>
+                <td class="p-3 text-right font-mono font-bold text-slate-900">300</td>
+                <td class="p-3 text-right">
+                  <input type="number" value="295" class="w-20 text-right font-mono text-xs border border-amber-300 rounded px-1.5 py-1 bg-white text-rose-600 font-bold">
+                </td>
+                <td class="p-3 text-right font-mono text-rose-600 font-bold">-5 kg</td>
+                <td class="p-3">
+                  <select class="text-[11px] border border-amber-300 rounded px-2 py-1 bg-white text-slate-800">
+                    <option selected>Glazing Loss (Susut Es Cair ~1.6%)</option>
+                    <option>Packaging Damaged (Plastik Rusak)</option>
+                    <option>Spoilage / Downgrade</option>
+                  </select>
+                </td>
+                <td class="p-3 text-center">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">52 Hari (Prioritas Jual)</span>
+                </td>
+              </tr>
+
+              <!-- Row 3 -->
+              <tr class="hover:bg-slate-50/80">
+                <td class="p-3 font-mono font-bold text-aruna-700">BTCH-SQD-012</td>
+                <td class="p-3">
+                  <div class="font-semibold text-slate-900">Cumi Tube Kupas Bersih</div>
+                  <div class="text-[11px] text-slate-500">Skinless • IQF -25°C</div>
+                </td>
+                <td class="p-3 text-slate-700">CS Brondong (Lamongan)</td>
+                <td class="p-3 font-mono text-slate-600">28 Okt 2026</td>
+                <td class="p-3 text-right font-mono font-bold text-slate-900">3.400</td>
+                <td class="p-3 text-right">
+                  <input type="number" value="3400" class="w-20 text-right font-mono text-xs border border-slate-200 rounded px-1.5 py-1 bg-white">
+                </td>
+                <td class="p-3 text-right font-mono text-slate-400">0</td>
+                <td class="p-3 text-slate-400 text-[11px]">Sesuai (Match)</td>
+                <td class="p-3 text-center">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">Aman (16 Hari)</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- MODAL ORDER B2B & SHIPPPER.ID SIMULATION -->
+  <!-- ============================================================== -->
+  <div id="order-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-lg overflow-hidden flex flex-col">
+      <!-- Modal Header (Aruna Blue) -->
+      <div class="bg-aruna-600 text-white p-4 flex items-center justify-between border-b border-aruna-700">
+        <div>
+          <div class="text-[11px] font-mono text-aruna-100 uppercase tracking-wider">Form Pemesanan B2B Terstruktur</div>
+          <h3 id="modal-product-name" class="font-bold text-base text-white">Yellowfin Tuna Loin</h3>
+        </div>
+        <button onclick="closeOrderModal()" class="text-aruna-100 hover:text-white p-1 rounded-lg hover:bg-aruna-700 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-5 space-y-4 text-xs">
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Pilih Titik Cold Storage Pengambilan</label>
+          <select id="modal-warehouse" class="w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50 text-slate-900">
+            <option value="Muara Baru (Jakarta)">📍 CS Muara Baru (Jakarta) — 4.500 kg Ready Stock</option>
+            <option value="Brondong (Lamongan)">📍 CS Brondong (Lamongan) — 2.200 kg Ready Stock</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">Volume Pesanan (kg)</label>
+            <input type="number" id="modal-qty" value="1200" oninput="updateCalculation()" class="w-full font-mono border border-slate-200 rounded-lg p-2 bg-white text-slate-900 font-bold focus:ring-1 focus:ring-aruna-600">
+          </div>
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">Target Tanggal Kirim</label>
+            <input type="date" value="2026-11-20" class="w-full border border-slate-200 rounded-lg p-2 bg-white text-slate-900">
+          </div>
+        </div>
+
+        <!-- Live Shipper.id & Truck Load Calculation Box -->
+        <div class="bg-aruna-50/70 border border-aruna-200 p-4 rounded-xl space-y-2">
+          <div class="flex items-center justify-between text-[11px] font-bold text-aruna-900">
+            <span class="flex items-center text-coral-600">
+              <i data-lucide="truck" class="w-3.5 h-3.5 mr-1"></i>
+              Kalkulator Muatan Armada (Otomatis)
+            </span>
+            <span id="calc-weight-badge" class="font-mono bg-aruna-600 text-white px-2 py-0.5 rounded text-[10px] shadow-xs">1.200 kg</span>
+          </div>
+          
+          <div class="text-[11px] text-slate-600 space-y-1 font-mono">
+            <div>🚚 Armada Dianjurkan: <strong class="text-slate-900 font-sans">1x Truk Thermal CDE Pendingin (Kapasitas ~2 Ton)</strong></div>
+            <div>🚢 Skala Kontainer Ekspor: <strong class="text-slate-900 font-sans">~10% dari 1 Kontainer Reefer 20ft (FCL)</strong></div>
+            <div class="text-aruna-700 font-semibold pt-1.5 border-t border-aruna-200 flex items-center">
+              <i data-lucide="check-circle" class="w-3.5 h-3.5 mr-1 text-emerald-600"></i>
+              <span>Live API Shipper.id: Cek tarif & tracking GPS terintegrasi otomatis.</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Nama Usaha / Pembeli & Nomor WhatsApp</label>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" placeholder="Nama Perusahaan / Resto" value="CV Bahari Pangan Lestari" class="border border-slate-200 rounded-lg p-2 text-xs">
+            <input type="text" placeholder="No. WhatsApp (+62)" value="081234567890" class="border border-slate-200 rounded-lg p-2 text-xs font-mono">
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="bg-slate-50 p-4 border-t border-slate-200 flex items-center justify-end space-x-3">
+        <button onclick="closeOrderModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:text-slate-900">Batal</button>
+        <button onclick="submitOrderWA()" class="px-5 py-2.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg flex items-center space-x-1.5 shadow-sm transition-colors">
+          <i data-lucide="send" class="w-3.5 h-3.5"></i>
+          <span>Kirim Rincian Order ke WA Sales</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-slate-200 py-6 px-4 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div>© 2026 <strong>Fishery Trade</strong> — Integrated Cold-Chain & Multi-Warehouse Platform.</div>
+      <div class="font-mono text-[11px] text-slate-400">Design Guideline Prototype • Aruna Coastal Blue Edition</div>
+    </div>
+  </footer>
+
+  <!-- INTERACTIVE JS SCRIPT -->
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Tab switcher
+    function switchTab(tabId) {
+      document.getElementById('section-design-tokens').classList.add('hidden');
+      document.getElementById('section-catalog-preview').classList.add('hidden');
+      document.getElementById('section-wms-preview').classList.add('hidden');
+
+      const inactiveClass = "px-3.5 py-1.5 rounded-md text-aruna-100 hover:text-white transition-all";
+      const activeClass = "px-3.5 py-1.5 rounded-md bg-white text-aruna-700 font-bold shadow-sm transition-all";
+
+      document.getElementById('tab-btn-tokens').className = inactiveClass;
+      document.getElementById('tab-btn-catalog').className = inactiveClass;
+      document.getElementById('tab-btn-wms').className = inactiveClass;
+
+      if (tabId === 'design-tokens') {
+        document.getElementById('section-design-tokens').classList.remove('hidden');
+        document.getElementById('tab-btn-tokens').className = activeClass;
+      } else if (tabId === 'catalog-preview') {
+        document.getElementById('section-catalog-preview').classList.remove('hidden');
+        document.getElementById('tab-btn-catalog').className = activeClass;
+      } else if (tabId === 'wms-preview') {
+        document.getElementById('section-wms-preview').classList.remove('hidden');
+        document.getElementById('tab-btn-wms').className = activeClass;
+      }
+      lucide.createIcons();
+    }
+
+    // Modal behavior
+    let currentProduct = "Yellowfin Tuna Loin";
+    let currentPrice = 95000;
+
+    function openOrderModal(productName, price) {
+      currentProduct = productName;
+      currentPrice = price;
+      document.getElementById('modal-product-name').innerText = productName;
+      document.getElementById('order-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeOrderModal() {
+      document.getElementById('order-modal').classList.add('hidden');
+    }
+
+    function updateCalculation() {
+      const qty = document.getElementById('modal-qty').value || 0;
+      document.getElementById('calc-weight-badge').innerText = qty + " kg";
+    }
+
+    function submitOrderWA() {
+      const warehouse = document.getElementById('modal-warehouse').value;
+      const qty = document.getElementById('modal-qty').value;
+      alert(`Pesanan Berhasil Disimulasikan!\n\nProduk: ${currentProduct}\nKuantitas: ${qty} kg\nPengambilan: ${warehouse}\n\nFormat rincian otomatis terhubung ke WhatsApp Sales & API Shipper.id!`);
+      closeOrderModal();
+    }
+
+    function copyWABlast() {
+      const text = `*UPDATE STOK READY FISHERY TRADE (13 NOV 2026)*\n\n📍 *CS Muara Baru (Jakarta):*\n• Yellowfin Tuna Loin (Grade A): 4.500 kg\n• Kakap Merah Utuh: 3.000 kg\n• Cumi Tube Kupas: 1.800 kg\n\n📍 *CS Brondong (Lamongan):*\n• Cumi Tube Kupas: 3.400 kg\n• Yellowfin Tuna Loin: 2.200 kg\n• Kakap Merah Utuh: 300 kg (Menipis)\n\nCek stok lengkap & order: https://fisherytrade.com/katalog`;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        const btnText = document.getElementById('btn-copy-text');
+        btnText.innerText = "✓ Berhasil Disalin ke Clipboard!";
+        setTimeout(() => {
+          btnText.innerText = "Salin Teks WA Hari Ini";
+        }, 3000);
+      });
+    }
+  </script>
+</body>
+</html>

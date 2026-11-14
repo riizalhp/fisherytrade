@@ -1,0 +1,13 @@
+---
+import Layout from '../layouts/Layout.astro';
+import FaqHeroSection from '../components/FaqHeroSection';
+import FaqAccordion from '../components/FaqAccordion';
+---
+
+<Layout
+  title="FAQ - Pertanyaan Umum"
+  description="Temukan jawaban atas pertanyaan umum seputar produk dan layanan PT. Triagro Hijrah Jaya."
+>
+  <FaqHeroSection />
+  <FaqAccordion client:load />
+</Layout>

@@ -1,0 +1,46 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import WarehouseCatalogSection from '../../components/WarehouseCatalogSection';
+
+const title = "Marketplace B2B Ikan & Seafood Beku Multi-Gudang";
+const description = "Katalog resmi B2B FisheryTrade. Cek tonase riil ikan beku terstandar (IQF & Air Blast) per cold storage di Muara Baru, Lamongan, Benoa Bali, dan Bitung.";
+---
+
+<Layout title={title} description={description}>
+  <div class="bg-gradient-to-b from-slate-900 to-slate-800 text-white py-14 px-4 sm:px-6 lg:px-8 border-b border-slate-700">
+    <div class="max-w-7xl mx-auto">
+      <div class="inline-flex items-center gap-2 py-1 px-3 bg-blue-500/20 border border-blue-400/30 text-blue-300 rounded-full text-xs font-semibold mb-4">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>Live Marketplace B2B & Transparansi Cold Storage</span>
+      </div>
+      <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-white">
+        Katalog Komoditas & Pasokan Ikan Beku
+      </h1>
+      <p class="text-slate-300 text-sm sm:text-base mt-3 max-w-2xl leading-relaxed">
+        Pilih komoditas sesuai spesifikasi grade mutu (IQF, Air Blast, Olahan Loin/Fillet/WR) dan ajukan permintaan penawaran (RFQ) langsung dari cold storage terdekat untuk efisiensi ongkos kirim.
+      </p>
+
+      {/* Feature Badges */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-8 text-xs">
+        <div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700/80">
+          <div class="font-bold text-white">4 Titik Gudang Dingin</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">Jakarta, Lamongan, Bali, Bitung</div>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700/80">
+          <div class="font-bold text-white">Standar Suhu -25°C</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">Rantai dingin kapal s/d truk</div>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700/80">
+          <div class="font-bold text-white">Integrasi Armada Shipper</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">Truk pendingin CDD & Fuso</div>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700/80">
+          <div class="font-bold text-white">Pemesanan B2B & RFQ</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">Auto-routing sales WhatsApp</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <WarehouseCatalogSection client:load />
+</Layout>

@@ -1,0 +1,79 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import CtaSection from '../components/CtaSection';
+
+interface Props {
+  title: string;
+  description: string;
+  keywords?: string;
+  image?: string;
+  type?: string;
+  hideCta?: boolean;
+}
+
+const {
+  title,
+  description = 'FisheryTrade menyediakan pasokan ikan dan hasil laut beku berkualitas standar industri untuk hotel, restoran, supermarket, dan distributor dengan jaminan cold chain -25°C.',
+  keywords = 'ikan beku, b2b seafood indonesia, supplier ikan resto, cold storage muara baru, tuna loin beku, kakap merah beku, cumi tube, udang vaname, pasokan horeka',
+  image = 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80',
+  type = 'website',
+  hideCta = false,
+} = Astro.props;
+
+const fullTitle = `${title} | FisheryTrade Indonesia`;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://fisherytrade.id/').href;
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="keywords" content={keywords} />
+    <meta name="author" content="FisheryTrade Indonesia" />
+    <meta name="publisher" content="FisheryTrade Indonesia" />
+    <meta name="robots" content="index, follow" />
+
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="canonical" href={canonical} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={image} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="FisheryTrade Indonesia" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
+
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body class="bg-slate-50 text-aruna-900 font-sans antialiased min-h-screen flex flex-col selection:bg-aruna-100 selection:text-aruna-900">
+    <Header client:load />
+
+    <main class="flex-grow">
+      <slot />
+    </main>
+
+    {!hideCta && <CtaSection />}
+    <Footer />
+  </body>
+</html>

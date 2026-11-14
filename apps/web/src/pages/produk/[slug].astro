@@ -1,0 +1,165 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ProductGallery from '../../components/ProductGallery';
+import { PRODUCTS } from '../../constants.tsx';
+import type { Product } from '../../types.ts';
+
+export function getStaticPaths() {
+  return PRODUCTS.map((product) => ({
+    params: { slug: product.slug },
+    props: { product },
+  }));
+}
+
+const { product } = Astro.props as { product: Product };
+const gallery = product.images && product.images.length > 0 ? product.images : [product.imageUrl];
+const otherProducts = PRODUCTS.filter((p) => p.id !== product.id).slice(0, 4);
+---
+
+<Layout title={product.name} description={product.description} image={product.imageUrl}>
+  <section class="pt-32 pb-16 sm:pt-40 sm:pb-24 px-4 sm:px-6 lg:px-8 bg-slate-50">
+    <div class="max-w-7xl mx-auto">
+      {/* Breadcrumbs */}
+      <div class="flex items-center text-xs font-medium text-slate-500 mb-8">
+        <a href="/" class="hover:text-aruna-600">Beranda</a>
+        <span class="mx-2">/</span>
+        <a href="/produk" class="hover:text-aruna-600">Katalog Ikan</a>
+        <span class="mx-2">/</span>
+        <span class="text-aruna-700 font-bold">{product.name}</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14">
+        {/* Image Gallery */}
+        <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-xs">
+          <ProductGallery client:load images={gallery} name={product.name} />
+        </div>
+
+        {/* Product Info */}
+        <div class="flex flex-col justify-between">
+          <div>
+            <div class="flex flex-wrap items-center gap-2 mb-3">
+              <span class="inline-block py-1 px-3 bg-aruna-100 text-aruna-800 rounded-lg text-xs font-bold uppercase tracking-wider">
+                {product.category}
+              </span>
+              <span class="inline-block py-1 px-3 bg-aruna-600 text-white rounded-lg text-xs font-mono font-bold">
+                {product.freezeMethod || 'IQF -25°C'}
+              </span>
+              <span class="inline-block py-1 px-3 bg-amber-500 text-white rounded-lg text-xs font-bold">
+                {product.grade || 'Grade A'}
+              </span>
+            </div>
+
+            <div class="text-xs font-mono text-slate-400 italic mb-1">
+              {product.scientificName}
+            </div>
+            
+            <h1 class="text-2xl sm:text-4xl font-extrabold text-aruna-900 mb-2 leading-tight">
+              {product.name}
+            </h1>
+            
+            <div class="flex items-baseline gap-3 mb-6">
+              <span class="text-2xl font-mono font-bold text-aruna-700">
+                {product.pricePerKg}
+              </span>
+              <span class="text-xs text-slate-500">
+                (Kemasan: {product.volume})
+              </span>
+            </div>
+
+            <div class="prose text-slate-600 text-sm leading-relaxed mb-6">
+              <p>{product.description}</p>
+            </div>
+
+            {/* Multi-Warehouse Stock Indicator */}
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 mb-6 shadow-xs">
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-xs font-bold text-aruna-900 uppercase font-mono tracking-wider">
+                  Ketersediaan Stok di Titik Gudang
+                </span>
+                <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-mono text-xs font-bold">
+                  Total: {product.totalStock}
+                </span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                  <div class="text-slate-500 text-[11px]">CS Muara Baru (JKT)</div>
+                  <div class="font-mono font-bold text-emerald-600 mt-0.5">{product.stockJakarta}</div>
+                </div>
+                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                  <div class="text-slate-500 text-[11px]">CS Brondong (Jatim)</div>
+                  <div class="font-mono font-bold text-emerald-600 mt-0.5">{product.stockLamongan}</div>
+                </div>
+                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                  <div class="text-slate-500 text-[11px]">CS Benoa (Bali)</div>
+                  <div class="font-mono font-bold mt-0.5 text-slate-700">{product.stockBali}</div>
+                </div>
+              </div>
+              <div class="text-[11px] text-slate-500 font-mono mt-3">
+                Minimum Pemesanan (MOQ): <strong class="text-slate-800">{product.moq}</strong>
+              </div>
+            </div>
+
+            {/* Key Benefits / Function */}
+            <div class="bg-aruna-50/80 border border-aruna-200/70 rounded-2xl p-5 mb-6">
+              <h3 class="text-sm font-bold text-aruna-900 mb-1.5 flex items-center gap-2">
+                <svg class="w-4 h-4 text-aruna-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Standar Penggunaan Dapur
+              </h3>
+              <p class="text-slate-700 text-xs leading-relaxed">{product.productFunction}</p>
+            </div>
+
+            {/* Problem Specifics */}
+            {(product.problemTitle || product.problemDescription) && (
+              <div class="bg-rose-50/60 border border-rose-200/60 rounded-2xl p-5 mb-6">
+                <h3 class="text-sm font-bold text-rose-900 mb-1">Solusi Mutu Terjamin:</h3>
+                {product.problemTitle && <p class="font-semibold text-rose-800 text-xs mb-1">{product.problemTitle}</p>}
+                <div class="text-slate-600 text-xs leading-relaxed" set:html={product.problemDescription || ''} />
+              </div>
+            )}
+          </div>
+
+          {/* Primary CTA */}
+          <div className="pt-2">
+            <a
+              href={`https://wa.me/6282241114959?text=Halo%20FisheryTrade,%20saya%20ingin%20memesan%20atau%20meminta%20sampel%20produk%20${encodeURIComponent(product.name)}.`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="w-full bg-coral-600 hover:bg-coral-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-md text-center block text-sm cursor-pointer"
+            >
+              Pesan / Minta Penawaran B2B (WhatsApp)
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Related Products */}
+  {otherProducts.length > 0 && (
+    <section class="py-16 bg-white border-t border-slate-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-xl sm:text-2xl font-bold text-aruna-900 mb-6">Komoditas Ikan Lainnya</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {otherProducts.map((p) => (
+            <a href={`/produk/${p.slug}`} class="group block bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden hover:shadow-md hover:border-aruna-300 transition-all">
+              <div class="aspect-[4/3] overflow-hidden bg-slate-100">
+                <img
+                  src={p.imageUrl}
+                  alt={p.name}
+                  class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
+              <div class="p-4">
+                <span class="text-[10px] font-mono text-aruna-600 font-bold block">{p.freezeMethod}</span>
+                <h3 class="font-bold text-aruna-900 text-sm group-hover:text-aruna-600 transition-colors mt-0.5">{p.name}</h3>
+                <p class="text-xs font-mono font-bold text-slate-700 mt-1">{p.pricePerKg}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+</Layout>

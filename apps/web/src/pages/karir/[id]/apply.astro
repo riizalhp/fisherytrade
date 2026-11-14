@@ -1,0 +1,25 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import ApplyHeroSection from '../../../components/ApplyHeroSection';
+import ApplicationFormSection from '../../../components/ApplicationFormSection';
+import { JOB_OPENINGS } from '../../../constants.tsx';
+import type { JobOpening } from '../../../types.ts';
+
+export function getStaticPaths() {
+  return JOB_OPENINGS.map((job) => ({
+    params: { id: job.id },
+    props: { job },
+  }));
+}
+
+const { job } = Astro.props as { job: JobOpening };
+---
+
+<Layout
+  title={`Lamar Pekerjaan: ${job.title}`}
+  description={`Kirimkan lamaran Anda untuk posisi ${job.title} di PT. Triagro Hijrah Jaya.`}
+  hideCta
+>
+  <ApplyHeroSection job={job} />
+  <ApplicationFormSection job={job} client:load />
+</Layout>

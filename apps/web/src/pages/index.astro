@@ -1,0 +1,26 @@
+---
+import Layout from '../layouts/Layout.astro';
+import HeroSection from '../components/HeroSection';
+import ServicesSection from '../components/ServicesSection';
+import WarehouseCatalogSection from '../components/WarehouseCatalogSection';
+import AboutSection from '../components/AboutSection';
+import CaseStudiesSection from '../components/CaseStudiesSection';
+import TestimonialsSection from '../components/TestimonialsSection';
+import FaqSection from '../components/FaqSection';
+import BlogSection from '../components/BlogSection';
+import { BLOG_POSTS, TESTIMONIALS } from '../constants.tsx';
+---
+
+<Layout
+  title="Pasokan Ikan & Hasil Laut Beku B2B Pasar Lokal"
+  description="FisheryTrade menyediakan pasokan ikan dan komoditas hasil laut beku terstandar (IQF -25°C) untuk hotel, restoran, supermarket, dan distributor daerah langsung dari fasilitas cold storage Muara Baru, Lamongan, dan Benoa."
+>
+  <HeroSection />
+  <ServicesSection />
+  <WarehouseCatalogSection client:load />
+  <AboutSection />
+  <CaseStudiesSection />
+  <TestimonialsSection testimonials={TESTIMONIALS} />
+  <FaqSection client:load />
+  <BlogSection posts={BLOG_POSTS} />
+</Layout>

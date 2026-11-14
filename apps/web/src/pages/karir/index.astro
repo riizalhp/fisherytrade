@@ -1,0 +1,14 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CareersHeroSection from '../../components/CareersHeroSection';
+import OpenPositionsSection from '../../components/OpenPositionsSection';
+import { JOB_OPENINGS } from '../../constants.tsx';
+---
+
+<Layout
+  title="Karir"
+  description="Bergabunglah dengan tim PT. Triagro Hijrah Jaya dan bangun karir Anda di industri pertanian modern."
+>
+  <CareersHeroSection />
+  <OpenPositionsSection jobs={JOB_OPENINGS} />
+</Layout>
