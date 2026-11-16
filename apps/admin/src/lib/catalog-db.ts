@@ -68,9 +68,10 @@ function getPool() {
   if (!connectionString) throw new Error('DATABASE_URL belum dikonfigurasi.');
   if (!pool || poolConnectionString !== connectionString) {
     if (pool) void pool.end();
+    const rejectUnauthorized = process.env.DB_SSL_REJECT_UNAUTHORIZED === 'true';
     pool = new Pool({
       connectionString,
-      ssl: { rejectUnauthorized: true },
+      ssl: { rejectUnauthorized },
       max: 5,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 10_000,
