@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import type { Product } from '../types.ts';
-import { ADMIN_API_BASE_URL } from '../lib/catalog-service.ts';
+import { ADMIN_API_BASE_URL, getAdminApiUrl } from '../lib/catalog-service.ts';
 
 interface TruckloadCalculatorProps {
   product: Product;
@@ -62,7 +62,7 @@ export const TruckloadCalculator: React.FC<TruckloadCalculatorProps> = ({ produc
 
   const handleRfqClick = () => {
     try {
-      fetch(`${ADMIN_API_BASE_URL}/api/rfq`, {
+      fetch(getAdminApiUrl('api/rfq'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

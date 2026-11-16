@@ -1,10 +1,50 @@
 import { PRODUCTS } from '../constants.tsx';
 import type { Product } from '../types.ts';
 
+/**
+ * Resolves the URL for calling the Admin WMS API service.
+ * 1. Runtime server functions: Uses the Vercel service binding `process.env.ADMIN_URL` via new URL(path, ADMIN_URL).
+ * 2. Explicit environment override: PUBLIC_ADMIN_API_URL if configured.
+ * 3. Client-side browser execution: Targets the dedicated master-admin subdomain.
+ * 4. Fallback: Localhost / standalone dev on http://localhost:4000.
+ */
+export function getAdminApiUrl(endpoint: string): string {
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+
+  // 1. Runtime server function: Read the bound service URL injected by Vercel
+  const boundServiceUrl = typeof process !== 'undefined' ? process.env?.ADMIN_URL : undefined;
+  if (boundServiceUrl) {
+    const serviceBase = boundServiceUrl.endsWith('/') ? boundServiceUrl : `${boundServiceUrl}/`;
+    return new URL(cleanEndpoint, serviceBase).toString();
+  }
+
+  // 2. Explicit public override (e.g. environment variable or custom domain)
+  const publicApiUrl =
+    (typeof process !== 'undefined' && process.env?.PUBLIC_ADMIN_API_URL) ||
+    (typeof import.meta !== 'undefined' && (import.meta as any).env?.PUBLIC_ADMIN_API_URL);
+  if (publicApiUrl) {
+    const base = publicApiUrl.endsWith('/') ? publicApiUrl : `${publicApiUrl}/`;
+    return new URL(cleanEndpoint, base).toString();
+  }
+
+  // 3. Client-side browser execution: Route to the master-admin subdomain
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    const mainHost = window.location.hostname.replace(/^www\./, '');
+    const adminHost = mainHost.startsWith('master-admin.') ? mainHost : `master-admin.${mainHost}`;
+    const port = window.location.port ? `:${window.location.port}` : '';
+    return `${window.location.protocol}//${adminHost}${port}/${cleanEndpoint}`;
+  }
+
+  // 4. Local standalone development fallback
+  return `http://localhost:4000/${cleanEndpoint}`;
+}
+
 export const ADMIN_API_BASE_URL =
-  (typeof process !== 'undefined' && process.env?.PUBLIC_ADMIN_API_URL) ||
-  import.meta.env?.PUBLIC_ADMIN_API_URL ||
-  'http://localhost:4000';
+  typeof process !== 'undefined' && process.env?.ADMIN_URL
+    ? (process.env.ADMIN_URL.endsWith('/') ? process.env.ADMIN_URL.slice(0, -1) : process.env.ADMIN_URL)
+    : (typeof process !== 'undefined' && process.env?.PUBLIC_ADMIN_API_URL) ||
+      (typeof import.meta !== 'undefined' && (import.meta as any).env?.PUBLIC_ADMIN_API_URL) ||
+      'http://localhost:4000';
 
 const getReferenceProducts = (): Product[] =>
   PRODUCTS.map((product) => ({ ...product, catalogSource: 'reference' }));
@@ -18,7 +58,8 @@ export async function getMarketplaceProducts(): Promise<Product[]> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2500);
 
-    const response = await fetch(`${ADMIN_API_BASE_URL}/api/catalog?format=marketplace`, {
+    const catalogUrl = getAdminApiUrl('api/catalog?format=marketplace');
+    const response = await fetch(catalogUrl, {
       signal: controller.signal,
       headers: {
         Accept: 'application/json',
@@ -79,7 +120,8 @@ export async function submitRFQInquiry(payload: {
   requestedVolumeTons: number;
 }): Promise<{ success: boolean; rfqNumber?: string; waLink?: string }> {
   try {
-    const response = await fetch(`${ADMIN_API_BASE_URL}/api/rfq`, {
+    const rfqUrl = getAdminApiUrl('api/rfq');
+    const response = await fetch(rfqUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PRODUCTS } from '../constants.tsx';
 import type { Product } from '../types.ts';
+import { getAdminApiUrl } from '../lib/catalog-service.ts';
 
 const WarehouseCatalogSection: React.FC = () => {
   const [items, setItems] = useState<Product[]>(PRODUCTS);
@@ -10,8 +11,7 @@ const WarehouseCatalogSection: React.FC = () => {
   useEffect(() => {
     const fetchLiveStock = async () => {
       try {
-        const apiUrl = 'http://localhost:4000';
-        const res = await fetch(`${apiUrl}/api/catalog?format=marketplace`, {
+        const res = await fetch(getAdminApiUrl('api/catalog?format=marketplace'), {
           headers: { Accept: 'application/json' },
         });
         if (res.ok) {

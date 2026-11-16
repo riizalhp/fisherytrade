@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import type { Product } from '../../types.ts';
-import { ADMIN_API_BASE_URL } from '../../lib/catalog-service.ts';
+import { ADMIN_API_BASE_URL, getAdminApiUrl } from '../../lib/catalog-service.ts';
 
 const WAREHOUSE_OPTIONS = [
   { id: 'all', label: 'Semua Cold Storage', hub: 'Seluruh Titik Distribusi' },
@@ -31,7 +31,7 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({ products }) =>
   useEffect(() => {
     const fetchLiveCatalog = async () => {
       try {
-        const res = await fetch(`${ADMIN_API_BASE_URL}/api/catalog?format=marketplace`, {
+        const res = await fetch(getAdminApiUrl('api/catalog?format=marketplace'), {
           headers: { Accept: 'application/json' },
         });
         if (res.ok) {

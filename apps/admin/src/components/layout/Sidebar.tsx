@@ -116,7 +116,7 @@ export function Sidebar() {
       {/* External Catalog Link & User Footer */}
       <div className="p-4 border-t border-slate-800 space-y-3">
         <a
-          href={`${process.env.NEXT_PUBLIC_WEB_URL || 'http://localhost:4321'}/produk`}
+          href={process.env.NEXT_PUBLIC_WEB_URL ? `${process.env.NEXT_PUBLIC_WEB_URL}/produk` : '/produk'}
           target="_blank"
           rel="noreferrer"
           className="flex items-center justify-between px-3 py-2 rounded-md bg-slate-800/80 hover:bg-slate-800 text-xs text-slate-300 border border-slate-700 transition-colors"
@@ -125,7 +125,7 @@ export function Sidebar() {
             <ExternalLink className="w-3.5 h-3.5 text-blue-400" />
             Buka Katalog Publik
           </span>
-          <span className="text-[10px] bg-slate-700 px-1.5 py-0.5 rounded text-slate-300">:4321</span>
+          <span className="text-[10px] bg-slate-700 px-1.5 py-0.5 rounded text-slate-300">Web</span>
         </a>
 
         <div className="flex items-center gap-3 pt-1">
