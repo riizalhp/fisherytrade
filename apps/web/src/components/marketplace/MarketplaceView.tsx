@@ -97,54 +97,6 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({ products }) =>
     return WAREHOUSE_OPTIONS.find((opt) => opt.id === selectedWarehouse) || WAREHOUSE_OPTIONS[0];
   }, [selectedWarehouse]);
 
-  // Slide-over Inspector Drawer State
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-
-  const openProduct = (product?: Product) => {
-    if (!product) return;
-    if (window.matchMedia('(max-width: 767px)').matches) {
-      window.location.assign(`/produk/${encodeURIComponent(product.slug)}/`);
-      return;
-    }
-    setSelectedProduct(product);
-  };
-
-  // In-Drawer RFQ & Truckload Calculator State
-  const [calcVolumeKg, setCalcVolumeKg] = useState<number>(250);
-  const [calcDestination, setCalcDestination] = useState<string>('Jabodetabek');
-  const [calcDeliverySchedule, setCalcDeliverySchedule] = useState<string>('Pengiriman Rutin Mingguan');
-
-  // Update volume when a new product is inspected
-  useEffect(() => {
-    if (selectedProduct) {
-      const parsedMoq = parseInt(selectedProduct.moq?.replace(/[^0-9]/g, '') || '100', 10);
-      setCalcVolumeKg(Math.max(parsedMoq || 100, 100));
-    }
-  }, [selectedProduct]);
-
-  // Close drawer on Escape key (R-32 accessibility)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && selectedProduct) {
-        setSelectedProduct(null);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedProduct]);
-
-  // Lock body scroll when drawer is open
-  useEffect(() => {
-    if (selectedProduct) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [selectedProduct]);
-
   // Filter products
   const filteredProducts = useMemo(() => {
     let result = items.filter((product) => {
@@ -182,40 +134,6 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({ products }) =>
   };
 
   const isFiltered = searchQuery !== '' || selectedWarehouse !== 'all';
-
-  // Calculator cost and fleet recommendations
-  const estimatedTotalCost = useMemo(() => {
-    if (!selectedProduct || !selectedProduct.priceNumeric) return 0;
-    return selectedProduct.priceNumeric * calcVolumeKg;
-  }, [selectedProduct, calcVolumeKg]);
-
-  const recommendedFleet = useMemo(() => {
-    if (calcVolumeKg <= 300) {
-      return {
-        fleet: 'Thermo Van Pendingin (-20°C)',
-        capacity: 'Kapasitas s/d 500 kg',
-        note: 'Ideal untuk pengiriman harian dapur restoran atau hotel lokal.'
-      };
-    }
-    if (calcVolumeKg <= 1500) {
-      return {
-        fleet: 'Truk CDE Box Reefer (Engkel 4 Roda)',
-        capacity: 'Kapasitas 1.500 s/d 2.000 kg',
-        note: 'Ideal untuk pasokan mingguan katering industri atau distributor menengah.'
-      };
-    }
-    return {
-      fleet: 'Truk CDD Box Reefer (Double 6 Roda)',
-      capacity: 'Kapasitas 4.000 s/d 5.000 kg',
-      note: 'Ideal untuk transfer tonase antar-kota atau restock gudang daerah.'
-    };
-  }, [calcVolumeKg]);
-
-  const generateWhatsAppCalcUrl = () => {
-    if (!selectedProduct) return '';
-    const text = `Halo FisheryTrade,%0A%0ASaya ingin mengajukan Request for Quotation (RFQ) untuk komoditas:%0A*Produk:* ${encodeURIComponent(selectedProduct.name)}%0A*Estimasi Kebutuhan:* ${calcVolumeKg} kg%0A*Kota Tujuan:* ${encodeURIComponent(calcDestination)}%0A*Jadwal Pasokan:* ${encodeURIComponent(calcDeliverySchedule)}%0A*Rekomendasi Armada:* ${encodeURIComponent(recommendedFleet.fleet)}%0A*Estimasi Subtotal:* Rp ${estimatedTotalCost.toLocaleString('id-ID')}%0A%0AMohon informasi ketersediaan slot armada dan konfirmasi harga final. Terima kasih.`;
-    return `https://wa.me/6282241114959?text=${text}`;
-  };
 
   return (
     <div className="w-full bg-slate-50 min-h-screen">
@@ -374,8 +292,8 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({ products }) =>
               </div>
 
               {/* Quick Simulator CTA */}
-              <button
-                onClick={() => openProduct(items[0])}
+              <a
+                href={items[0] ? `/produk/${encodeURIComponent(items[0].slug)}/` : '/produk/'}
                 className="hidden md:inline-flex w-full md:w-auto flex-shrink-0 items-center justify-center gap-2 min-h-[44px] py-2.5 px-4 rounded-lg bg-coral-500 hover:bg-coral-600 text-white text-xs sm:text-sm font-bold transition-colors shadow-xs"
               >
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -383,7 +301,7 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({ products }) =>
                 </svg>
                 <span className="md:hidden">Lihat Detail Produk</span>
                 <span className="hidden md:inline">Simulasi Muatan Truk</span>
-              </button>
+              </a>
             </div>
           </div>
         </div>
@@ -485,89 +403,91 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({ products }) =>
         {/* Desktop View: responsive product-card grid */}
         {filteredProducts.length > 0 && (
           <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-stretch gap-4">
-            {filteredProducts.map((product) => (
-              <article
-                key={product.id}
-                className="group flex min-w-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:border-aruna-300 hover:shadow-md"
-              >
-                <div className="relative aspect-square w-full overflow-hidden bg-slate-100">
-                  <img
-                    src={product.imageUrl}
-                    alt={product.name}
-                    className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
-                    loading="lazy"
-                  />
-                  {product.grade && (
-                    <span className="absolute left-2.5 top-2.5 max-w-[calc(100%-1.25rem)] truncate rounded-md bg-white/95 px-2 py-1 text-[10px] font-bold text-aruna-900 shadow-sm">
-                      {product.grade}
-                    </span>
-                  )}
-                  {product.catalogSource === 'live' && product.totalStock && (
-                    <span className="absolute right-2.5 top-2.5 rounded-md bg-emerald-700/95 px-2 py-1 text-[10px] font-bold text-white shadow-sm">
-                      Stok aktif
-                    </span>
-                  )}
-                </div>
+            {filteredProducts.map((product) => {
+              const productUrl = `/produk/${encodeURIComponent(product.slug)}/`;
+              return (
+                <article
+                  key={product.id}
+                  className="group flex min-w-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:border-aruna-300 hover:shadow-md"
+                >
+                  <a href={productUrl} className="relative aspect-square w-full overflow-hidden bg-slate-100 block">
+                    <img
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
+                      loading="lazy"
+                    />
+                    {product.grade && (
+                      <span className="absolute left-2.5 top-2.5 max-w-[calc(100%-1.25rem)] truncate rounded-md bg-white/95 px-2 py-1 text-[10px] font-bold text-aruna-900 shadow-sm">
+                        {product.grade}
+                      </span>
+                    )}
+                    {product.catalogSource === 'live' && product.totalStock && (
+                      <span className="absolute right-2.5 top-2.5 rounded-md bg-emerald-700/95 px-2 py-1 text-[10px] font-bold text-white shadow-sm">
+                        Stok aktif
+                      </span>
+                    )}
+                  </a>
 
-                <div className="flex flex-1 flex-col p-3">
-                  <span className="block truncate text-[10px] font-semibold uppercase tracking-wide text-aruna-700">
-                    {product.cutType || product.category}
-                  </span>
-                  <h2 className="mt-1 line-clamp-2 min-h-10 text-sm font-bold leading-snug">
-                    <button type="button" onClick={() => setSelectedProduct(product)} className="text-left text-aruna-900 transition-colors hover:text-aruna-700">
-                      {product.name}
-                    </button>
-                  </h2>
-                  <p className="mt-0.5 truncate text-[11px] italic text-slate-400">
-                    {product.scientificName || 'Komoditas perikanan'}
-                  </p>
-
-                  <div className="mt-3 border-t border-slate-100 pt-2.5">
-                    <span className="block text-[10px] text-slate-500">Harga terbuka / kg</span>
-                    <span className="mt-0.5 block truncate text-base font-extrabold tabular-nums text-coral-700">
-                      {product.pricePerKg || 'Harga melalui RFQ'}
+                  <div className="flex flex-1 flex-col p-3">
+                    <span className="block truncate text-[10px] font-semibold uppercase tracking-wide text-aruna-700">
+                      {product.cutType || product.category}
                     </span>
-                    <div className="mt-1 flex items-center justify-between gap-2 text-[10px] text-slate-600">
-                      <span className="truncate">MOQ <strong className="text-slate-800">{product.moq || 'Hubungi sales'}</strong></span>
-                      <span className="truncate text-right">{product.freezeMethod || product.grade || 'Mutu terstandar'}</span>
+                    <h2 className="mt-1 line-clamp-2 min-h-10 text-sm font-bold leading-snug">
+                      <a href={productUrl} className="text-left text-aruna-900 transition-colors hover:text-aruna-700">
+                        {product.name}
+                      </a>
+                    </h2>
+                    <p className="mt-0.5 truncate text-[11px] italic text-slate-400">
+                      {product.scientificName || 'Komoditas perikanan'}
+                    </p>
+
+                    <div className="mt-3 border-t border-slate-100 pt-2.5">
+                      <span className="block text-[10px] text-slate-500">Harga terbuka / kg</span>
+                      <span className="mt-0.5 block truncate text-base font-extrabold tabular-nums text-coral-700">
+                        {product.pricePerKg || 'Harga melalui RFQ'}
+                      </span>
+                      <div className="mt-1 flex items-center justify-between gap-2 text-[10px] text-slate-600">
+                        <span className="truncate">MOQ <strong className="text-slate-800">{product.moq || 'Hubungi sales'}</strong></span>
+                        <span className="truncate text-right">{product.freezeMethod || product.grade || 'Mutu terstandar'}</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-1 gap-1.5 border-t border-slate-100 pt-2.5 text-[10px]">
+                      {[
+                        ['Muara Baru', product.stockJakarta],
+                        ['Brondong', product.stockLamongan],
+                        ['Benoa', product.stockBali],
+                      ].map(([warehouse, stock]) => (
+                        <div key={warehouse} className="flex items-center justify-between gap-2">
+                          <span className="truncate text-slate-500">{warehouse}</span>
+                          <span className={`truncate text-right tabular-nums ${stock?.includes('Habis') ? 'font-normal text-slate-400' : 'font-semibold text-slate-700'}`}>
+                            {stock || 'Cek stok'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-3 flex gap-2 border-t border-slate-100 pt-3">
+                      <a
+                        href={productUrl}
+                        className="min-h-9 flex-1 rounded-lg border border-aruna-200 bg-aruna-50 px-2 text-[11px] font-bold text-aruna-700 transition-colors hover:bg-aruna-100 inline-flex items-center justify-center text-center"
+                      >
+                        Detail
+                      </a>
+                      <a
+                        href={product.whatsappUrl || `https://wa.me/6282241114959?text=Halo%20FisheryTrade,%20saya%20ingin%20memesan%20${encodeURIComponent(product.name)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex min-h-9 flex-1 items-center justify-center rounded-lg bg-coral-500 px-2 text-[11px] font-bold text-white shadow-xs transition-colors hover:bg-coral-600"
+                      >
+                        Pesan
+                      </a>
                     </div>
                   </div>
-
-                  <div className="mt-3 grid grid-cols-1 gap-1.5 border-t border-slate-100 pt-2.5 text-[10px]">
-                    {[
-                      ['Muara Baru', product.stockJakarta],
-                      ['Brondong', product.stockLamongan],
-                      ['Benoa', product.stockBali],
-                    ].map(([warehouse, stock]) => (
-                      <div key={warehouse} className="flex items-center justify-between gap-2">
-                        <span className="truncate text-slate-500">{warehouse}</span>
-                        <span className={`truncate text-right tabular-nums ${stock?.includes('Habis') ? 'font-normal text-slate-400' : 'font-semibold text-slate-700'}`}>
-                          {stock || 'Cek stok'}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-3 flex gap-2 border-t border-slate-100 pt-3">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedProduct(product)}
-                      className="min-h-9 flex-1 rounded-lg border border-aruna-200 bg-aruna-50 px-2 text-[11px] font-bold text-aruna-700 transition-colors hover:bg-aruna-100"
-                    >
-                      Detail
-                    </button>
-                    <a
-                      href={product.whatsappUrl || `https://wa.me/6282241114959?text=Halo%20FisheryTrade,%20saya%20ingin%20memesan%20${encodeURIComponent(product.name)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex min-h-9 flex-1 items-center justify-center rounded-lg bg-coral-500 px-2 text-[11px] font-bold text-white shadow-xs transition-colors hover:bg-coral-600"
-                    >
-                      Pesan
-                    </a>
-                  </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
         )}
 
@@ -651,323 +571,18 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({ products }) =>
               >
                 Jadwal Ambil Mandiri
               </a>
-              <button
-                onClick={() => openProduct(items[0])}
+              <a
+                href={items[0] ? `/produk/${encodeURIComponent(items[0].slug)}/` : '/produk/'}
                 className="min-h-[44px] py-2.5 px-5 rounded-lg bg-coral-500 hover:bg-coral-600 text-white text-xs font-bold text-center inline-flex items-center justify-center transition-colors shadow-xs"
               >
                 <span className="md:hidden">Lihat Detail Produk</span>
                 <span className="hidden md:inline">Simulasi Muatan Truk</span>
-              </button>
+              </a>
             </div>
           </div>
         </section>
 
       </main>
-
-      {/* Slide-over Inspector Drawer (Direction 1) */}
-      {selectedProduct && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
-            onClick={() => setSelectedProduct(null)}
-            aria-hidden="true"
-          />
-
-          {/* Slide-over Container */}
-          <div className="fixed inset-y-0 right-0 max-w-full flex pl-6 sm:pl-10">
-            <div
-              className="w-screen max-w-xl md:max-w-2xl bg-white shadow-2xl border-l border-slate-200 flex flex-col h-full animate-in slide-in-from-right duration-250 relative z-50"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="drawer-product-title"
-            >
-              
-              {/* Drawer Header (Fixed) */}
-              <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/90 flex-shrink-0">
-                <div className="min-w-0 pr-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-aruna-100 text-aruna-800">
-                      {selectedProduct.cutType || selectedProduct.category}
-                    </span>
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-900">
-                      {selectedProduct.grade || 'Grade A'}
-                    </span>
-                  </div>
-                  <h2 id="drawer-product-title" className="text-lg sm:text-xl font-extrabold text-aruna-900 truncate">
-                    {selectedProduct.name}
-                  </h2>
-                  <span className="text-xs font-mono text-slate-400 italic block">
-                    {selectedProduct.scientificName}
-                  </span>
-                </div>
-
-                <button
-                  onClick={() => setSelectedProduct(null)}
-                  className="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors focus:outline-none"
-                  aria-label="Tutup inspeksi"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Drawer Scrollable Content */}
-              <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6 text-xs">
-                
-                {/* Hero Product Photo (Clean 16:9, No Stacking Clutter) */}
-                <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-100 relative h-64 sm:h-72">
-                  <img
-                    src={selectedProduct.imageUrl}
-                    alt={selectedProduct.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute bottom-3 left-3 bg-aruna-950/90 text-white px-3 py-1.5 rounded-lg text-xs font-semibold backdrop-blur-xs border border-aruna-800">
-                    Metode Pembekuan: {selectedProduct.freezeMethod || 'IQF -25°C'}
-                  </div>
-                </div>
-
-                {/* Core Commercial Pricing Strip */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
-                  <div>
-                    <span className="text-[11px] text-slate-400 block">Harga Terbuka</span>
-                    <span className="text-base font-extrabold text-aruna-900 tabular-nums">
-                      {selectedProduct.pricePerKg}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[11px] text-slate-400 block">Minimal Order</span>
-                    <span className="text-xs font-bold text-slate-800">
-                      {selectedProduct.moq || '100 kg'}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[11px] text-slate-400 block">Kadar Glazing</span>
-                    <span className="text-xs font-bold text-emerald-700">
-                      {selectedProduct.glazing || '0%'}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[11px] text-slate-400 block">Kemasan Fisik</span>
-                    <span className="text-xs font-bold text-slate-800 truncate block" title={selectedProduct.volume}>
-                      {selectedProduct.volume}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Physical Cold Storage Distribution */}
-                <div className="space-y-2">
-                  <h3 className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
-                    Ketersediaan Stok Fisik per Gudang
-                  </h3>
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="p-2.5 rounded-lg border border-slate-200 bg-white">
-                      <span className="text-[10px] text-slate-400 block">Muara Baru (JKT)</span>
-                      <span className="font-bold text-xs text-aruna-900 block mt-0.5 tabular-nums">
-                        {selectedProduct.stockJakarta || '-'}
-                      </span>
-                    </div>
-                    <div className="p-2.5 rounded-lg border border-slate-200 bg-white">
-                      <span className="text-[10px] text-slate-400 block">Brondong (LMG)</span>
-                      <span className="font-bold text-xs text-aruna-900 block mt-0.5 tabular-nums">
-                        {selectedProduct.stockLamongan || '-'}
-                      </span>
-                    </div>
-                    <div className="p-2.5 rounded-lg border border-slate-200 bg-white">
-                      <span className="text-[10px] text-slate-400 block">Benoa (Bali)</span>
-                      <span className="font-bold text-xs text-aruna-900 block mt-0.5 tabular-nums">
-                        {selectedProduct.stockBali || '-'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Culinary Description & Quality Assurance */}
-                <div className="space-y-3 bg-white p-4 rounded-xl border border-slate-200">
-                  <h3 className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
-                    Deskripsi Potongan & Karakteristik Olahan
-                  </h3>
-                  <p className="text-slate-600 leading-relaxed text-xs">
-                    {selectedProduct.description}
-                  </p>
-                  {selectedProduct.productFunction && (
-                    <div className="pt-2 border-t border-slate-100">
-                      <span className="font-semibold text-slate-700 block mb-0.5">Aplikasi Dapur yang Cocok:</span>
-                      <p className="text-slate-500 leading-relaxed text-xs">
-                        {selectedProduct.productFunction}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Integrated Truckload & RFQ Simulator */}
-                <div className="bg-aruna-50/70 border border-aruna-200/80 rounded-xl p-4 sm:p-5 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-aruna-900 text-xs sm:text-sm">
-                      Kalkulator Tonase & Muatan Truk Reefer
-                    </h3>
-                    <span className="text-xs font-mono font-bold text-aruna-800 tabular-nums">
-                      {calcVolumeKg.toLocaleString('id-ID')} kg
-                    </span>
-                  </div>
-
-                  {/* Volume Slider */}
-                  <div>
-                    <input
-                      type="range"
-                      min="50"
-                      max="5000"
-                      step="50"
-                      value={calcVolumeKg}
-                      onChange={(e) => setCalcVolumeKg(Number(e.target.value))}
-                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-coral-500"
-                    />
-                    <div className="grid grid-cols-5 gap-1.5 mt-2">
-                      {[100, 250, 500, 1000, 2500].map((preset) => (
-                        <button
-                          key={preset}
-                          type="button"
-                          onClick={() => setCalcVolumeKg(preset)}
-                          className={`min-h-[32px] py-1 rounded-md text-[11px] font-sans font-semibold tabular-nums transition-colors ${
-                            calcVolumeKg === preset
-                              ? 'bg-aruna-700 text-white font-bold'
-                              : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
-                          }`}
-                        >
-                          {preset} kg
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Destination & Schedule */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                    <div>
-                      <label className="block font-bold text-slate-700 text-[11px] mb-1.5 uppercase tracking-wider">
-                        Kota Tujuan Pengiriman
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                        </div>
-                        <select
-                          value={calcDestination}
-                          onChange={(e) => setCalcDestination(e.target.value)}
-                          className="w-full appearance-none pl-9 pr-9 py-2.5 rounded-lg border border-slate-200 bg-white hover:border-slate-300 focus:bg-white text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-aruna-700/20 focus:border-aruna-700 transition-all cursor-pointer shadow-2xs"
-                        >
-                          <option value="Jabodetabek">Jabodetabek (Hub Muara Baru)</option>
-                          <option value="Surabaya & Jawa Timur">Surabaya & Jatim (Hub Brondong)</option>
-                          <option value="Denpasar & Bali">Denpasar & Bali (Hub Benoa)</option>
-                          <option value="Semarang & Solo">Semarang & Jawa Tengah</option>
-                          <option value="Bandung Raya">Bandung Raya (Jawa Barat)</option>
-                          <option value="Kota Luar Pulau Lainnya">Kota Luar Pulau Lainnya</option>
-                        </select>
-                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block font-bold text-slate-700 text-[11px] mb-1.5 uppercase tracking-wider">
-                        Jadwal Pasokan
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                        <select
-                          value={calcDeliverySchedule}
-                          onChange={(e) => setCalcDeliverySchedule(e.target.value)}
-                          className="w-full appearance-none pl-9 pr-9 py-2.5 rounded-lg border border-slate-200 bg-white hover:border-slate-300 focus:bg-white text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-aruna-700/20 focus:border-aruna-700 transition-all cursor-pointer shadow-2xs"
-                        >
-                          <option value="Pengiriman Besok Pagi">Pengiriman Besok Pagi (Fast Reefer)</option>
-                          <option value="Pengiriman Rutin Mingguan">Pengiriman Rutin Mingguan (Scheduled)</option>
-                          <option value="Kontrak Pasokan Bulanan">Kontrak Pasokan Bulanan (B2B Contract)</option>
-                          <option value="Pengambilan Mandiri di Gudang">Pengambilan Mandiri di Gudang (Self Pick-up)</option>
-                        </select>
-                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Calculation Result */}
-                  <div className="bg-white rounded-lg p-3.5 border border-aruna-200 space-y-1.5">
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-500">Estimasi Subtotal:</span>
-                      <span className="font-extrabold text-sm text-aruna-900 tabular-nums">
-                        Rp {estimatedTotalCost.toLocaleString('id-ID')}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-start text-[11px] pt-1.5 border-t border-slate-100">
-                      <span className="text-slate-500">Rekomendasi Armada:</span>
-                      <span className="font-bold text-slate-800 text-right">
-                        {recommendedFleet.fleet}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-
-              {/* Drawer Sticky Footer Actions */}
-              <div className="p-4 sm:p-5 border-t border-slate-200 bg-white flex flex-col sm:flex-row gap-3 flex-shrink-0">
-                <a
-                  href={generateWhatsAppCalcUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => {
-                    if (selectedProduct) {
-                      try {
-                        const apiUrl = 'http://localhost:4000';
-                        fetch(`${apiUrl}/api/rfq`, {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({
-                            buyerName: 'Calon Pembeli (Katalog Web)',
-                            buyerPhone: '08xxxxxxxx',
-                            coldStorageName: selectedWarehouse !== 'all' ? `CS ${selectedWarehouse}` : 'Semua Gudang',
-                            destinationCity: calcDestination,
-                            commodityName: selectedProduct.name,
-                            requestedVolumeTons: calcVolumeKg / 1000,
-                          }),
-                        }).catch(() => {});
-                      } catch {}
-                    }
-                  }}
-                  className="flex-grow min-h-[44px] py-2.5 px-4 rounded-lg bg-coral-500 hover:bg-coral-600 text-white font-bold text-xs text-center transition-colors flex items-center justify-center gap-2 shadow-xs"
-                >
-                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/>
-                  </svg>
-                  <span>Ajukan RFQ Komoditas ke WhatsApp Sales</span>
-                </a>
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedProduct(null)}
-                  className="min-h-[44px] py-2.5 px-4 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs text-center inline-flex items-center justify-center transition-colors"
-                >
-                  Kembali ke Daftar Produk
-                </button>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   );

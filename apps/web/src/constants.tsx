@@ -113,10 +113,9 @@ export const PRODUCTS: Product[] = [
     scientificName: 'Thunnus albacares',
     cutType: 'Fillet & Loin',
     volume: 'Kemasan Vakum 2 kg / Master Box 20 kg',
-    imageUrl: 'https://images.unsplash.com/photo-1501595091296-3aa970afb3ff?auto=format&fit=crop&w=700&q=80',
+    imageUrl: '/images/products/08-yellowfin-tuna-loin-beku.webp',
     images: [
-      'https://images.unsplash.com/photo-1501595091296-3aa970afb3ff?auto=format&fit=crop&w=700&q=80',
-      'https://images.unsplash.com/photo-1534483509719-3feaee7c30da?auto=format&fit=crop&w=700&q=80'
+      '/images/products/08-yellowfin-tuna-loin-beku.webp'
     ],
     category: 'Ikan Pelagis',
     freezeMethod: 'IQF -25°C',
@@ -142,9 +141,9 @@ export const PRODUCTS: Product[] = [
     scientificName: 'Lutjanus campechanus',
     cutType: 'Ikan Utuh (WR / G&G)',
     volume: 'Size 1-2 kg / ekor (Master Box 15 kg)',
-    imageUrl: 'https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=700&q=80',
+    imageUrl: '/images/products/05-kakap-merah-utuh-beku.webp',
     images: [
-      'https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=700&q=80'
+      '/images/products/05-kakap-merah-utuh-beku.webp'
     ],
     category: 'Ikan Demersal',
     freezeMethod: 'Air Blast -30°C',
@@ -170,9 +169,9 @@ export const PRODUCTS: Product[] = [
     scientificName: 'Loligo edulis',
     cutType: 'Cumi & Gurita',
     volume: 'Kemasan 1 kg (Glazing 10%) / Box 10 kg',
-    imageUrl: 'https://images.unsplash.com/photo-1545601445-4d6a0a0565f0?auto=format&fit=crop&w=700&q=80',
+    imageUrl: '/images/products/03-cumi-tube-kupas-bersih.webp',
     images: [
-      'https://images.unsplash.com/photo-1545601445-4d6a0a0565f0?auto=format&fit=crop&w=700&q=80'
+      '/images/products/03-cumi-tube-kupas-bersih.webp'
     ],
     category: 'Chepalopoda',
     freezeMethod: 'IQF -25°C',
@@ -198,9 +197,9 @@ export const PRODUCTS: Product[] = [
     scientificName: 'Litopenaeus vannamei',
     cutType: 'Udang & Crustacea',
     volume: 'Size 30-40 ekor/kg / Block Box 10 kg',
-    imageUrl: 'https://images.unsplash.com/photo-1566575167524-1b8b9c66c30d?auto=format&fit=crop&w=700&q=80',
+    imageUrl: '/images/products/06-udang-vaname-beku-fresh.webp',
     images: [
-      'https://images.unsplash.com/photo-1566575167524-1b8b9c66c30d?auto=format&fit=crop&w=700&q=80'
+      '/images/products/06-udang-vaname-beku-fresh.webp'
     ],
     category: 'Crustacea',
     freezeMethod: 'Semi-IQF -25°C',
@@ -226,9 +225,9 @@ export const PRODUCTS: Product[] = [
     scientificName: 'Pangasius hypophthalmus',
     cutType: 'Fillet & Loin',
     volume: 'Kemasan 1 kg (Master Box 10 kg)',
-    imageUrl: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=700&q=80',
+    imageUrl: '/images/products/04-dori-pangasius-fillet-beku.webp',
     images: [
-      'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=700&q=80'
+      '/images/products/04-dori-pangasius-fillet-beku.webp'
     ],
     category: 'Ikan Air Tawar & Payau',
     freezeMethod: 'IQF -25°C',
@@ -254,9 +253,9 @@ export const PRODUCTS: Product[] = [
     scientificName: 'Katsuwonus pelamis',
     cutType: 'Ikan Utuh (WR / G&G)',
     volume: 'Size 1.5 - 2.5 kg/ekor (Curah Karung 25 kg)',
-    imageUrl: 'https://images.unsplash.com/photo-1510130387422-82ebd3301c0e?auto=format&fit=crop&w=700&q=80',
+    imageUrl: '/images/products/02-cakalang-utuh-beku.webp',
     images: [
-      'https://images.unsplash.com/photo-1510130387422-82ebd3301c0e?auto=format&fit=crop&w=700&q=80'
+      '/images/products/02-cakalang-utuh-beku.webp'
     ],
     category: 'Ikan Pelagis',
     freezeMethod: 'Air Blast -30°C',
@@ -282,9 +281,9 @@ export const PRODUCTS: Product[] = [
     scientificName: 'Salmo salar',
     cutType: 'Fillet & Loin',
     volume: 'Vakum Individual 200g (Master Box 10 kg)',
-    imageUrl: 'https://images.unsplash.com/photo-1499125562588-29fb8a56b5d0?auto=format&fit=crop&w=700&q=80',
+    imageUrl: '/images/products/01-atlantic-salmon-portion-beku.webp',
     images: [
-      'https://images.unsplash.com/photo-1499125562588-29fb8a56b5d0?auto=format&fit=crop&w=700&q=80'
+      '/images/products/01-atlantic-salmon-portion-beku.webp'
     ],
     category: 'Ikan Pelagis Impor',
     freezeMethod: 'IQF -40°C',
@@ -310,9 +309,9 @@ export const PRODUCTS: Product[] = [
     scientificName: 'Litopenaeus vannamei',
     cutType: 'Udang & Crustacea',
     volume: 'Size 31/40 (Master Box 10 kg / Kemasan 1 kg)',
-    imageUrl: 'https://images.unsplash.com/photo-1559742811-82286364344a?auto=format&fit=crop&w=700&q=80',
+    imageUrl: '/images/products/07-udang-vaname-pdto-kupas-bersih.webp',
     images: [
-      'https://images.unsplash.com/photo-1559742811-82286364344a?auto=format&fit=crop&w=700&q=80'
+      '/images/products/07-udang-vaname-pdto-kupas-bersih.webp'
     ],
     category: 'Crustacea',
     freezeMethod: 'IQF -25°C',

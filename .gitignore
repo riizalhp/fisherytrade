@@ -5,6 +5,7 @@ node_modules/
 # Next.js & Astro builds
 .next/
 out/
+output/
 dist/
 dist-ssr/
 .astro/

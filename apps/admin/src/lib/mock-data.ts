@@ -70,7 +70,7 @@ export const INITIAL_COMMODITIES: Commodity[] = [
     scientificName: 'Thunnus albacares',
     category: 'Pelagis',
     slug: 'yellowfin-tuna-loin-beku',
-    imageUrl: 'https://images.unsplash.com/photo-1501595091296-3aa970afb3ff?auto=format&fit=crop&w=700&q=80',
+    imageUrl: '/images/products/08-yellowfin-tuna-loin-beku.webp',
     description: 'Potongan Yellowfin Tuna Loin tanpa kulit, tanpa tulang, dan tanpa garis darah (bloodline). Dikemas vakum per piece 2 kg dengan metode IQF suhu -25°C untuk menjaga warna merah alami dan kekenyalan daging.',
   },
   {
@@ -80,7 +80,7 @@ export const INITIAL_COMMODITIES: Commodity[] = [
     scientificName: 'Lutjanus campechanus',
     category: 'Demersal',
     slug: 'kakap-merah-utuh-beku',
-    imageUrl: 'https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=700&q=80',
+    imageUrl: '/images/products/05-kakap-merah-utuh-beku.webp',
     description: 'Ikan Kakap Merah segar hasil tangkapan pancing nelayan pesisir. Sudah dibersihkan insang dan isi perutnya (G&G), lalu dibekukan dengan Air Blast Freezer suhu -30°C.',
   },
   {
@@ -90,7 +90,7 @@ export const INITIAL_COMMODITIES: Commodity[] = [
     scientificName: 'Loligo edulis',
     category: 'Cephalopoda',
     slug: 'cumi-tube-kupas-bersih',
-    imageUrl: 'https://images.unsplash.com/photo-1545601445-4d6a0a0565f0?auto=format&fit=crop&w=700&q=80',
+    imageUrl: '/images/products/03-cumi-tube-kupas-bersih.webp',
     description: 'Cumi tabung bersih tanpa kulit, tanpa sayap, dan tanpa tulang lunak. Diproses higienis dengan glazing es terkontrol 10% agar berat bersih daging tetap maksimal saat dimasak.',
   },
   {
@@ -100,7 +100,7 @@ export const INITIAL_COMMODITIES: Commodity[] = [
     scientificName: 'Litopenaeus vannamei',
     category: 'Crustacea',
     slug: 'udang-vaname-beku-hoso',
-    imageUrl: 'https://images.unsplash.com/photo-1566575167524-1b8b9c66c30d?auto=format&fit=crop&w=700&q=80',
+    imageUrl: '/images/products/06-udang-vaname-beku-fresh.webp',
     description: 'Udang Vaname hasil tambak budidaya terakreditasi Cara Budidaya Ikan yang Baik (CBIB). Tubuh padat, transparan berkilau, dan bebas residu antibiotik terlarang.',
   },
   {
@@ -110,7 +110,7 @@ export const INITIAL_COMMODITIES: Commodity[] = [
     scientificName: 'Pangasius hypophthalmus',
     category: 'Demersal',
     slug: 'dori-pangasius-fillet-beku',
-    imageUrl: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=700&q=80',
+    imageUrl: '/images/products/04-dori-pangasius-fillet-beku.webp',
     description: 'Fillet daging dori tanpa kulit, tanpa tulang, daging putih bersih tanpa bercak merah. Pilihan utama restoran cepat saji, hotel, katering perjamuan, dan menu fish and chips.',
   },
   {
@@ -120,7 +120,7 @@ export const INITIAL_COMMODITIES: Commodity[] = [
     scientificName: 'Katsuwonus pelamis',
     category: 'Pelagis',
     slug: 'cakalang-utuh-beku-wr',
-    imageUrl: 'https://images.unsplash.com/photo-1510130387422-82ebd3301c0e?auto=format&fit=crop&w=700&q=80',
+    imageUrl: '/images/products/02-cakalang-utuh-beku.webp',
     description: 'Ikan Cakalang utuh beku tangkapan kapal purse seine dan pancing pole & line. Pembekuan cepat langsung di palka kapal menjaga mata tetap bening dan daging padat kenyal.',
   },
   {
@@ -130,7 +130,7 @@ export const INITIAL_COMMODITIES: Commodity[] = [
     scientificName: 'Salmo salar',
     category: 'Pelagis',
     slug: 'salmon-portion-fillet-beku',
-    imageUrl: 'https://images.unsplash.com/photo-1499125562588-29fb8a56b5d0?auto=format&fit=crop&w=700&q=80',
+    imageUrl: '/images/products/01-atlantic-salmon-portion-beku.webp',
     description: 'Potongan porsi Atlantic Salmon dengan kulit bersih tanpa sisik (boneless, pin bone out). Warna jingga kemerahan alami kaya Omega-3, tekstur marbling lembut prima.',
   },
   {
@@ -140,7 +140,7 @@ export const INITIAL_COMMODITIES: Commodity[] = [
     scientificName: 'Litopenaeus vannamei',
     category: 'Crustacea',
     slug: 'udang-vaname-pdto-kupas-masak',
-    imageUrl: 'https://images.unsplash.com/photo-1559742811-82286364344a?auto=format&fit=crop&w=700&q=80',
+    imageUrl: '/images/products/07-udang-vaname-pdto-kupas-bersih.webp',
     description: 'Udang Vaname kupas bersih dengan ekor tersisa (PDTO) dan punggung sudah dibelah dibuang kotorannya. Siap masak tanpa repot, menghemat waktu persiapan dapur.',
   },
 ];

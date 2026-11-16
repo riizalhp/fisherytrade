@@ -1,10 +1,12 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import ProductGallery from '../../components/ProductGallery';
+import TruckloadCalculator from '../../components/TruckloadCalculator';
 import { PRODUCTS } from '../../constants.tsx';
 import { getMarketplaceProducts } from '../../lib/catalog-service.ts';
 import type { Product } from '../../types.ts';
 
+// Detail produk komoditas FisheryTrade
 export async function getStaticPaths() {
   const products = await getMarketplaceProducts();
   return products.map((product) => ({
@@ -38,7 +40,7 @@ const specifications = [
   ['Kemasan', product.volume],
   ['Masa simpan', product.shelfLife],
 ].filter(([, value]) => Boolean(value));
-const shareImage = productImages[0] || new URL('/fisherytrade.png', Astro.site ?? Astro.url).href;
+const shareImage = productImages[0] ? new URL(productImages[0], Astro.site ?? Astro.url).href : new URL('/fisherytrade.png', Astro.site ?? Astro.url).href;
 ---
 
 <Layout title={product.name} description={product.description} image={shareImage} type="product" hideCta>
@@ -107,6 +109,10 @@ const shareImage = productImages[0] || new URL('/fisherytrade.png', Astro.site ?
               ))}
             </dl>
           </section>
+
+          <div class="mt-7">
+            <TruckloadCalculator client:load product={product} />
+          </div>
         </div>
       </div>
     </div>
