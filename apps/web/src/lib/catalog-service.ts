@@ -6,6 +6,9 @@ export const ADMIN_API_BASE_URL =
   import.meta.env?.PUBLIC_ADMIN_API_URL ||
   'http://localhost:4000';
 
+const getReferenceProducts = (): Product[] =>
+  PRODUCTS.map((product) => ({ ...product, catalogSource: 'reference' }));
+
 /**
  * Mengambil katalog komoditas & ketersediaan stok fisik riil dari Admin WMS API (Next.js).
  * Memiliki mekanisme fallback otomatis ke data katalog statis jika server admin sedang offline.
@@ -25,11 +28,11 @@ export async function getMarketplaceProducts(): Promise<Product[]> {
 
     if (!response.ok) {
       console.warn(`[CatalogService] Admin API status ${response.status}. Fallback ke katalog statis.`);
-      return PRODUCTS;
+      return getReferenceProducts();
     }
 
     const json = await response.json();
-    if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+    if (json.success && Array.isArray(json.data)) {
       // Gabungkan data live (stok cold storage & harga) dengan informasi konten kaya (deskripsi masalah/solusi)
       const mergedProducts: Product[] = json.data.map((liveItem: Product) => {
         const fallback = PRODUCTS.find((p) => p.slug === liveItem.slug || p.name === liveItem.name);
@@ -37,19 +40,21 @@ export async function getMarketplaceProducts(): Promise<Product[]> {
           ...fallback,
           ...liveItem,
           images: liveItem.images && liveItem.images.length > 0 ? liveItem.images : fallback?.images || [liveItem.imageUrl],
-          problemTitle: fallback?.problemTitle,
-          problemDescription: fallback?.problemDescription,
-          productFunction: fallback?.productFunction || liveItem.productFunction,
+          problemTitle: liveItem.problemTitle ?? fallback?.problemTitle,
+          problemDescription: liveItem.problemDescription ?? fallback?.problemDescription,
+          productFunction: liveItem.productFunction ?? fallback?.productFunction ?? '',
+          catalogSource: 'live',
+          catalogFetchedAt: new Date().toISOString(),
         };
       });
 
       return mergedProducts;
     }
 
-    return PRODUCTS;
+    return getReferenceProducts();
   } catch {
     // Jika server Next.js admin belum berjalan atau jaringan terputus, fallback dengan aman
-    return PRODUCTS;
+    return getReferenceProducts();
   }
 }
 

@@ -1,74 +1,26 @@
-# Supabase Project Setup & Credentials - FisheryTrade
+# FisheryTrade Supabase dan akses admin
 
-Dokumen ini mencatat konfigurasi dan identitas akun Supabase untuk monorepo FisheryTrade.
+## Katalog produk
 
----
+Katalog `/produk` membaca data dari tabel `public.product_catalog` melalui server admin. Skema dan delapan produk dummy ada di migration [`supabase/migrations/20261114000000_product_catalog.sql`](../supabase/migrations/20261114000000_product_catalog.sql). Setelah CLI terhubung ke project yang benar, terapkan migration dari root repo:
 
-## 1. Identitas Akun & Kepemilikan
-
-> **PENTING / TANDA AKUN**:  
-> Akun Supabase ini terdaftar & dikelola melalui akun **ChatGPT Gmail**:  
-> **`jbbarkassmg@gmail.com`**
-
----
-
-## 2. Kredensial & Detail Koneksi
-
-| Parameter | Nilai | Keterangan |
-|---|---|---|
-| **Project Ref** | `nrumbfvfdolguzmczbsk` | ID unik project Supabase |
-| **Project URL** | `https://nrumbfvfdolguzmczbsk.supabase.co` | Endpoint REST / Auth / Storage |
-| **Publishable / Anon Key** | `sb_publishable_g8Sd-h_u6P3Qj_Uj_JvIoQ_tfUem7vV` | Client-side public key |
-| **Database Password** | `Sembarang-123` | Password user `postgres` |
-| **Direct PostgreSQL URI** | `postgresql://postgres:Sembarang-123@db.nrumbfvfdolguzmczbsk.supabase.co:5432/postgres` | Direct connection (IPv6) |
-| **Owner Email** | `jbbarkassmg@gmail.com` | Login via Google/ChatGPT |
-
----
-
-## 3. Status Supabase CLI di Workspace
-
-1. **Supabase CLI**:
-   - Telah ditambahkan sebagai root devDependency (`pnpm supabase` / `npx supabase`).
-   - Script shortcut `pnpm supabase` sudah terdaftar di root `package.json`.
-
-2. **Inisialisasi (`supabase init`)**:
-   - Telah selesai dijalankan (`supabase/config.toml` sudah terbuat).
-
-3. **Project Link Local (`supabase link`)**:
-   - Project ref `nrumbfvfdolguzmczbsk` sudah diset di `supabase/.temp/project-ref`.
-   - `pnpm supabase status` sudah mengenali project ref ini.
-
----
-
-## 4. Langkah Login CLI (Interactive Personal Access Token)
-
-Supabase CLI memerlukan **Personal Access Token (PAT)** untuk berinteraksi dengan Supabase Management API (seperti untuk `supabase link`, `supabase db pull`, `supabase db push`, dan `supabase gen types`):
-
-### Cara 1: Login via Browser (Otomatis)
-Buka terminal interaktif Anda di folder project dan jalankan:
 ```bash
-pnpm supabase login
+pnpm supabase link --project-ref <project-ref>
+pnpm supabase db push
 ```
-Perintah ini akan membuka browser. Pastikan Anda login dengan akun Google/ChatGPT: **`jbbarkassmg@gmail.com`**, lalu konfirmasi otorisasi CLI.
 
-### Cara 2: Login via Personal Access Token
-1. Buka dashboard token Supabase: [https://supabase.com/dashboard/account/tokens](https://supabase.com/dashboard/account/tokens) (login dengan `jbbarkassmg@gmail.com`).
-2. Klik **Generate new token**, beri nama misalnya `fisherytrade-cli`.
-3. Salin token (dimulai dengan `sbp_...`).
-4. Jalankan perintah di terminal:
-   ```bash
-   pnpm supabase login --token sbp_xxxxxxxxxxxxxxxxxxxxxxxx
-   ```
-5. Setelah login, jalankan link remote:
-   ```bash
-   pnpm supabase link --project-ref nrumbfvfdolguzmczbsk
-   ```
-   *(Masukkan database password `Sembarang-123` jika diminta)*
+Migration mengaktifkan Row Level Security dan tidak membuat kebijakan tulis anonim. Server admin terhubung ke PostgreSQL Supabase memakai `DATABASE_URL`; kredensial database tidak dikirim ke browser.
 
----
+## Environment variables
 
-## 5. Lokasi Konfigurasi Environment di Monorepo
+Buat `apps/admin/.env.local` dari `.env.example`, lalu isi `DATABASE_URL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, dan `ADMIN_SESSION_SECRET` dari konfigurasi deployment yang aman. `DATABASE_URL` harus berupa connection string PostgreSQL Supabase dan hanya boleh tersedia di server admin. Jika direct connection Supabase hanya menyediakan IPv6 dan environment pengembangan tidak punya rute IPv6, gunakan connection string Session Pooler yang mendukung IPv4 dari menu Connect di dashboard Supabase. Jangan commit `.env.local`.
 
-- **Template Global**: [`.env.example`](file:///d:/CODING/fisherytrade/.env.example)
-- **Admin App (Next.js)**: [`apps/admin/.env.local`](file:///d:/CODING/fisherytrade/apps/admin/.env.local)
-- **Web / Marketplace (Astro)**: [`apps/web/.env.local`](file:///d:/CODING/fisherytrade/apps/web/.env.local)
+Buat `apps/web/.env.local` dan set `PUBLIC_ADMIN_API_URL` ke URL publik admin API. Untuk pengembangan lokal nilainya `http://localhost:4000`; pada deployment, gunakan URL HTTPS aplikasi admin. `NEXT_PUBLIC_WEB_URL` dipakai untuk tautan kembali ke katalog publik dari sidebar admin.
+
+## Login admin
+
+Admin memakai username/password biasa dan cookie sesi bertanda tangan, bukan Supabase Auth. Di mode development saja, jika variabel belum diatur, tersedia akun demo `admin` / `fisherytrade-demo`. Sebelum deployment, wajib atur username, password yang kuat, dan `ADMIN_SESSION_SECRET` acak; tanpa konfigurasi ini login produksi ditolak.
+
+## Catatan keamanan
+
+Jangan masukkan password database, API key rahasia, atau kredensial admin ke file tracked. Nilai database yang sebelumnya pernah tersimpan di file repo sebaiknya dirotasi dan diganti hanya di environment aman, termasuk environment deployment. File `.env.local` sudah diabaikan Git.

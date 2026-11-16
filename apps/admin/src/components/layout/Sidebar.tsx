@@ -12,7 +12,8 @@ import {
   AlertTriangle,
   FileSpreadsheet,
   ExternalLink,
-  ShieldAlert
+  Package,
+  LogOut
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -52,10 +53,20 @@ const NAV_ITEMS = [
     href: '/rfq',
     icon: FileSpreadsheet,
   },
+  {
+    label: 'Katalog Produk',
+    href: '/products',
+    icon: Package,
+  },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  if (pathname === '/login') return null;
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+    window.location.assign('/login');
+  };
 
   return (
     <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col h-screen sticky top-0 text-slate-300">
@@ -76,7 +87,7 @@ export function Sidebar() {
           Manajemen Gudang Dingin
         </div>
         {NAV_ITEMS.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href || (item.href === '/products' && pathname.startsWith('/products/'));
           const Icon = item.icon;
           return (
             <Link
@@ -105,7 +116,7 @@ export function Sidebar() {
       {/* External Catalog Link & User Footer */}
       <div className="p-4 border-t border-slate-800 space-y-3">
         <a
-          href="http://localhost:4321/shop"
+          href={`${process.env.NEXT_PUBLIC_WEB_URL || 'http://localhost:4321'}/produk`}
           target="_blank"
           rel="noreferrer"
           className="flex items-center justify-between px-3 py-2 rounded-md bg-slate-800/80 hover:bg-slate-800 text-xs text-slate-300 border border-slate-700 transition-colors"
@@ -129,6 +140,9 @@ export function Sidebar() {
             </p>
           </div>
         </div>
+        <button onClick={handleLogout} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors">
+          <LogOut className="w-3.5 h-3.5" /> Keluar dari Admin
+        </button>
       </div>
     </aside>
   );

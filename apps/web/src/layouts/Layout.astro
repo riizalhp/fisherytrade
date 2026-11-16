@@ -67,7 +67,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://fisherytrad
   </head>
 
   <body class="bg-slate-50 text-aruna-900 font-sans antialiased min-h-screen flex flex-col selection:bg-aruna-100 selection:text-aruna-900">
-    <Header client:load />
+    <Header client:load solid={Astro.url.pathname !== '/'} />
 
     <main class="flex-grow">
       <slot />

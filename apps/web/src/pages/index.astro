@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import HeroSection from '../components/HeroSection';
+import ProductsSection from '../components/ProductsSection';
 import ServicesSection from '../components/ServicesSection';
 import AboutSection from '../components/AboutSection';
 import CaseStudiesSection from '../components/CaseStudiesSection';
@@ -8,6 +9,9 @@ import TestimonialsSection from '../components/TestimonialsSection';
 import FaqSection from '../components/FaqSection';
 import BlogSection from '../components/BlogSection';
 import { BLOG_POSTS, TESTIMONIALS } from '../constants.tsx';
+import { getMarketplaceProducts } from '../lib/catalog-service.ts';
+
+const marketplaceProducts = await getMarketplaceProducts();
 ---
 
 <Layout
@@ -15,6 +19,7 @@ import { BLOG_POSTS, TESTIMONIALS } from '../constants.tsx';
   description="FisheryTrade adalah platform marketplace barang perikanan dan hasil laut terstandar untuk hotel, restoran, supermarket, dan distributor daerah langsung dari sentra gudang distribusi Muara Baru, Lamongan, dan Benoa."
 >
   <HeroSection />
+  <ProductsSection products={marketplaceProducts} />
   <ServicesSection />
   <AboutSection />
   <CaseStudiesSection />

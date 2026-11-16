@@ -1,154 +1,127 @@
 import { NextResponse } from 'next/server';
-import {
-  INITIAL_COMMODITIES,
-  INITIAL_PRODUCT_SPECS,
-  INITIAL_COLD_STORAGES,
-  INITIAL_BATCHES
-} from '@/lib/mock-data';
+import { hasAdminSession } from '@/lib/admin-auth';
+import { createProduct, deleteProduct, listProducts, toMarketplaceProduct, updateProduct, type CatalogProductInput } from '@/lib/catalog-db';
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+function json(data: unknown, status = 200) {
+  return NextResponse.json(data, { status, headers: corsHeaders });
+}
+
+function validateInput(value: unknown): CatalogProductInput {
+  if (!value || typeof value !== 'object') throw new Error('Data produk tidak valid.');
+  const body = value as Record<string, unknown>;
+  const requiredStrings = ['slug', 'name', 'category', 'volume', 'cutType', 'freezeMethod', 'grade', 'description'];
+  for (const field of requiredStrings) {
+    if (typeof body[field] !== 'string' || !String(body[field]).trim()) throw new Error(`Kolom ${field} wajib diisi.`);
+  }
+  const numberFields = ['moqKg', 'pricePerKg', 'stockJakartaKg', 'stockLamonganKg', 'stockBaliKg'];
+  const numbers = Object.fromEntries(numberFields.map((field) => [field, Number(body[field])])) as Record<string, number>;
+  for (const field of numberFields) {
+    if (!Number.isFinite(numbers[field]) || numbers[field] < 0) throw new Error(`Nilai ${field} harus angka nol atau lebih.`);
+  }
+  if (numbers.moqKg < 1) throw new Error('MOQ minimum adalah 1 kg.');
+  const slug = String(body.slug).trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  if (!slug) throw new Error('Slug produk tidak valid.');
+  const imageUrl = typeof body.imageUrl === 'string' ? body.imageUrl.trim() : '';
+  return {
+    slug,
+    name: String(body.name).trim(),
+    englishName: typeof body.englishName === 'string' ? body.englishName.trim() : '',
+    scientificName: typeof body.scientificName === 'string' ? body.scientificName.trim() : '',
+    category: String(body.category).trim(),
+    imageUrl,
+    images: Array.isArray(body.images) ? body.images.filter((image): image is string => typeof image === 'string') : imageUrl ? [imageUrl] : [],
+    description: String(body.description).trim(),
+    productFunction: typeof body.productFunction === 'string' ? body.productFunction.trim() : '',
+    problemTitle: typeof body.problemTitle === 'string' ? body.problemTitle.trim() : '',
+    problemDescription: typeof body.problemDescription === 'string' ? body.problemDescription.trim() : '',
+    volume: String(body.volume).trim(),
+    cutType: String(body.cutType).trim(),
+    freezeMethod: String(body.freezeMethod).trim(),
+    grade: String(body.grade).trim(),
+    moqKg: numbers.moqKg,
+    pricePerKg: numbers.pricePerKg,
+    stockJakartaKg: numbers.stockJakartaKg,
+    stockLamonganKg: numbers.stockLamonganKg,
+    stockBaliKg: numbers.stockBaliKg,
+    glazing: typeof body.glazing === 'string' ? body.glazing.trim() : '',
+    isActive: body.isActive !== false,
+  };
+}
+
+function databaseError(error: unknown) {
+  const message = error instanceof Error ? error.message : '';
+  if (message.includes('belum dikonfigurasi')) return 'Supabase belum terhubung. Atur DATABASE_URL pada environment server admin.';
+  if ((error as { code?: string })?.code === '23505' || message.includes('409') || message.includes('23505') || message.toLowerCase().includes('duplicate')) return 'Slug atau SKU produk sudah digunakan.';
+  console.error('[catalog-api]', message);
+  return 'Gagal berkomunikasi dengan database katalog. Periksa migration dan koneksi Supabase.';
+}
+
+function validationError(error: unknown) {
+  return error instanceof Error && /wajib diisi|tidak valid|harus angka|MOQ minimum/.test(error.message);
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const format = searchParams.get('format');
-
-  // Aggregate available tonnage per commodity & warehouse
-  const catalog = INITIAL_COMMODITIES.map((commodity, index) => {
-    const specs = INITIAL_PRODUCT_SPECS.filter((s) => s.commodityId === commodity.id);
-    const relatedBatches = INITIAL_BATCHES.filter(
-      (b) => b.commodityName === commodity.name || b.productSpecId?.startsWith(`spec-${commodity.id.replace('com-', '')}`)
-    );
-
-    const totalWeightKg = relatedBatches.reduce((acc, b) => acc + b.availableWeightKg, 0);
-    const totalAvailableTons = (totalWeightKg / 1000).toFixed(2);
-
-    const warehouseStocks: Record<string, number> = {};
-    const availableWarehouses = INITIAL_COLD_STORAGES.map((cs) => {
-      const csBatches = relatedBatches.filter((b) => b.coldStorageId === cs.id);
-      const csKg = csBatches.reduce((acc, b) => acc + b.availableWeightKg, 0);
-      const csTons = (csKg / 1000).toFixed(2);
-      warehouseStocks[cs.code] = csKg;
-      return {
-        id: cs.id,
-        code: cs.code,
-        name: cs.name,
-        city: cs.city,
-        availableKg: csKg,
-        availableTons: Number(csTons),
-      };
-    }).filter((w) => w.availableTons > 0);
-
-    const primarySpec = specs[0];
-    const priceNumeric = primarySpec?.pricePerKg || 0;
-
-    const jktKg = warehouseStocks['JKT-01'] || 0;
-    const lmgKg = warehouseStocks['LMG-01'] || 0;
-    const dpsKg = warehouseStocks['DPS-01'] || 0;
-
-    const formatStock = (kg: number) => {
-      if (kg <= 0) return 'Stok Habis';
-      if (kg < 500) return `${kg.toLocaleString('id-ID')} kg (Menipis)`;
-      return `${kg.toLocaleString('id-ID')} kg`;
-    };
-
-    return {
-      // Base WMS Entity
-      id: commodity.id,
-      numericId: index + 1,
-      slug: commodity.slug,
-      name: commodity.name,
-      englishName: commodity.englishName,
-      scientificName: commodity.scientificName,
-      category: commodity.category,
-      imageUrl: commodity.imageUrl,
-      description: commodity.description,
-      specs,
-      totalAvailableTons: Number(totalAvailableTons),
-      availableWarehouses,
-
-      // Marketplace Compatibility Fields
-      cutType: primarySpec?.processingCut || 'Whole Round',
-      freezeMethod: primarySpec ? `${primarySpec.freezingMethod} -25°C` : 'IQF -25°C',
-      grade: primarySpec?.grade || 'Grade A',
-      moq: primarySpec ? `${primarySpec.moqKg} kg` : '100 kg',
-      pricePerKg: `Rp ${priceNumeric.toLocaleString('id-ID')} / kg`,
-      priceNumeric,
-      volume: primarySpec?.sizeSpecs || 'Master Box 10-20 kg',
-      stockJakarta: formatStock(jktKg),
-      stockLamongan: formatStock(lmgKg),
-      stockBali: formatStock(dpsKg),
-      totalStock: `${totalWeightKg.toLocaleString('id-ID')} kg`,
-      whatsappUrl: `https://wa.me/6282241114959?text=${encodeURIComponent(
-        `Halo FisheryTrade, saya ingin memesan pasokan ${commodity.name}.`
-      )}`,
-    };
-  });
-
-  // If format=marketplace, return directly mapped array compatible with Product[]
-  if (format === 'marketplace') {
-    const marketplaceData = catalog.map((c) => ({
-      id: c.numericId,
-      slug: c.slug,
-      name: c.name,
-      volume: c.volume,
-      imageUrl: c.imageUrl,
-      images: [c.imageUrl],
-      description: c.description,
-      category: c.category === 'Cephalopoda' ? 'Chepalopoda' : `Ikan ${c.category}`,
-      productFunction: `Pasokan standar komersial untuk kebutuhan dapur hotel, restoran, dan katering horeka.`,
-      scientificName: c.scientificName,
-      freezeMethod: c.freezeMethod,
-      grade: c.grade,
-      moq: c.moq,
-      pricePerKg: c.pricePerKg,
-      priceNumeric: c.priceNumeric,
-      stockJakarta: c.stockJakarta,
-      stockLamongan: c.stockLamongan,
-      stockBali: c.stockBali,
-      totalStock: c.totalStock,
-      whatsappUrl: c.whatsappUrl,
-      cutType: c.cutType,
-    }));
-
-    return NextResponse.json(
-      {
-        success: true,
-        data: marketplaceData,
-        count: marketplaceData.length,
-        timestamp: new Date().toISOString(),
-      },
-      {
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        },
-      }
-    );
-  }
-
-  return NextResponse.json(
-    {
-      success: true,
-      data: catalog,
-      count: catalog.length,
-      timestamp: new Date().toISOString(),
-    },
-    {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      },
+  const adminMode = searchParams.get('admin') === '1';
+  if (adminMode && !await hasAdminSession()) return json({ success: false, error: 'Sesi admin tidak valid.' }, 401);
+  try {
+    const products = await listProducts(adminMode);
+    if (searchParams.get('format') === 'marketplace') {
+      const marketplaceData = products.map((product, index) => toMarketplaceProduct(product, index + 1));
+      return json({ success: true, data: marketplaceData, count: marketplaceData.length, timestamp: new Date().toISOString() });
     }
-  );
+    return json({ success: true, data: products, count: products.length, timestamp: new Date().toISOString() });
+  } catch (error) {
+    return json({ success: false, error: databaseError(error), data: [] }, 503);
+  }
+}
+
+export async function POST(request: Request) {
+  if (!await hasAdminSession()) return json({ success: false, error: 'Sesi admin tidak valid.' }, 401);
+  try {
+    const input = validateInput(await request.json());
+    const product = await createProduct(input);
+    return json({ success: true, data: product }, 201);
+  } catch (error) {
+    return json({ success: false, error: validationError(error) ? (error as Error).message : databaseError(error) }, validationError(error) ? 400 : 500);
+  }
+}
+
+export async function PATCH(request: Request) {
+  if (!await hasAdminSession()) return json({ success: false, error: 'Sesi admin tidak valid.' }, 401);
+  const { searchParams } = new URL(request.url);
+  const slug = searchParams.get('slug');
+  if (!slug) return json({ success: false, error: 'Slug produk tidak ditemukan.' }, 400);
+  try {
+    const input = validateInput(await request.json());
+    const product = await updateProduct(slug, input);
+    return json({ success: true, data: product });
+  } catch (error) {
+    return json({ success: false, error: validationError(error) ? (error as Error).message : databaseError(error) }, validationError(error) ? 400 : 500);
+  }
+}
+
+export async function DELETE(request: Request) {
+  if (!await hasAdminSession()) return json({ success: false, error: 'Sesi admin tidak valid.' }, 401);
+  const { searchParams } = new URL(request.url);
+  const slug = searchParams.get('slug');
+  if (!slug) return json({ success: false, error: 'Slug produk tidak ditemukan.' }, 400);
+  try {
+    const products = await listProducts(true);
+    if (!products.some((product) => product.slug === slug)) return json({ success: false, error: 'Produk tidak ditemukan.' }, 404);
+    await deleteProduct(slug);
+    return json({ success: true });
+  } catch (error) {
+    return json({ success: false, error: databaseError(error) }, 503);
+  }
 }
 
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
-  });
+  return new NextResponse(null, { status: 204, headers: corsHeaders });
 }

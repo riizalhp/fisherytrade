@@ -14,149 +14,145 @@ export async function getStaticPaths() {
 }
 
 const { product, allProducts = PRODUCTS } = Astro.props as { product: Product; allProducts?: Product[] };
-const gallery = product.images && product.images.length > 0 ? product.images : [product.imageUrl];
-const otherProducts = allProducts.filter((p) => p.id !== product.id).slice(0, 4);
+const otherProducts = allProducts.filter((item) => item.id !== product.id).slice(0, 4);
+const sourceImages = product.images?.length ? product.images : [product.imageUrl];
+// Foto stok bukan bukti SKU: hanya foto unggahan produk yang masuk galeri utama.
+const productImages = sourceImages.filter((image) => image && !image.includes('images.unsplash.com'));
+const tunaServingImage = sourceImages.find((image) => image?.includes('photo-1501595091296-3aa970afb3ff'));
+const illustration = productImages.length === 0 && product.slug === 'yellowfin-tuna-loin-beku' && !!tunaServingImage;
+const gallery = productImages.length > 0 ? productImages : illustration ? [tunaServingImage!] : [];
+const quoteUrl = `https://wa.me/6282241114959?text=${encodeURIComponent(`Halo FisheryTrade, saya ingin meminta penawaran ${product.name}. Mohon konfirmasi harga, stok per gudang, serta foto lot dan kemasan terbaru.`)}`;
+const photoUrl = `https://wa.me/6282241114959?text=${encodeURIComponent(`Halo FisheryTrade, mohon foto lot dan kemasan terbaru untuk ${product.name}.`)}`;
+const isReference = product.catalogSource !== 'live';
+const snapshotDate = product.catalogFetchedAt ? new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Jakarta' }).format(new Date(product.catalogFetchedAt)) : null;
+const warehouses = [
+  { name: 'Muara Baru', location: 'Jakarta', stock: product.stockJakarta },
+  { name: 'Brondong', location: 'Jawa Timur', stock: product.stockLamongan },
+  { name: 'Benoa', location: 'Bali', stock: product.stockBali },
+];
+const specifications = [
+  ['Bentuk potongan', product.cutType],
+  ['Metode pembekuan', product.freezeMethod],
+  ['Grade pada katalog', product.grade],
+  ['Glazing', product.glazing],
+  ['Kemasan', product.volume],
+  ['Masa simpan', product.shelfLife],
+].filter(([, value]) => Boolean(value));
+const shareImage = productImages[0] || new URL('/fisherytrade.png', Astro.site ?? Astro.url).href;
 ---
 
-<Layout title={product.name} description={product.description} image={product.imageUrl}>
-  <section class="pt-32 pb-16 sm:pt-40 sm:pb-24 px-4 sm:px-6 lg:px-8 bg-slate-50">
-    <div class="max-w-7xl mx-auto">
-      {/* Breadcrumbs */}
-      <div class="flex items-center text-xs font-medium text-slate-500 mb-8">
-        <a href="/" class="hover:text-aruna-600">Beranda</a>
-        <span class="mx-2">/</span>
-        <a href="/produk" class="hover:text-aruna-600">Katalog Ikan</a>
-        <span class="mx-2">/</span>
-        <span class="text-aruna-700 font-bold">{product.name}</span>
-      </div>
+<Layout title={product.name} description={product.description} image={shareImage} type="product" hideCta>
+  <!-- Arah: B2B maritim, ENERGY 2 / RHYTHM 2 / MOTION 1. Biru memberi struktur; jingga hanya untuk aksi penawaran. Inter untuk spesifikasi padat, angka tabular untuk harga. -->
+  <section class="product-detail bg-white px-4 pb-12 pt-24 sm:px-6 sm:pb-16 sm:pt-28 lg:px-8">
+    <div class="mx-auto max-w-7xl">
+      <nav aria-label="Breadcrumb" class="mb-5 text-sm text-slate-600 sm:mb-7">
+        <ol class="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <li><a href="/" class="inline-flex min-h-11 items-center hover:text-aruna-700">Beranda</a></li>
+          <li aria-hidden="true" class="text-slate-400">/</li>
+          <li><a href="/produk/" class="inline-flex min-h-11 items-center hover:text-aruna-700">Produk</a></li>
+          <li aria-hidden="true" class="text-slate-400">/</li>
+          <li aria-current="page" class="max-w-full break-words font-medium text-aruna-900">{product.name}</li>
+        </ol>
+      </nav>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14">
-        {/* Image Gallery */}
-        <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-xs">
-          <ProductGallery client:load images={gallery} name={product.name} />
+      <div class="grid min-w-0 items-start gap-8 lg:grid-cols-2 lg:gap-12">
+        <div class="order-2 min-w-0 lg:order-1">
+          <ProductGallery client:load images={gallery} name={product.name} illustration={illustration} requestPhotoUrl={photoUrl} />
+          <div class="mt-6 border-t border-slate-200 pt-5">
+            <h2 class="text-sm font-semibold text-aruna-900">Pastikan sesuai kebutuhan dapur Anda</h2>
+            <p class="mt-2 max-w-lg text-sm leading-relaxed text-slate-600">Minta foto lot, rincian berat bersih, dan dokumen mutu sebelum menyepakati pesanan. Spesifikasi akhir mengikuti lot yang ditawarkan tim sales.</p>
+          </div>
         </div>
 
-        {/* Product Info */}
-        <div class="flex flex-col justify-between">
-          <div>
-            <div class="flex flex-wrap items-center gap-2 mb-3">
-              <span class="inline-block py-1 px-3 bg-aruna-100 text-aruna-800 rounded-lg text-xs font-bold uppercase tracking-wider">
-                {product.category}
-              </span>
-              <span class="inline-block py-1 px-3 bg-aruna-600 text-white rounded-lg text-xs font-mono font-bold">
-                {product.freezeMethod || 'IQF -25°C'}
-              </span>
-              <span class="inline-block py-1 px-3 bg-amber-500 text-white rounded-lg text-xs font-bold">
-                {product.grade || 'Grade A'}
-              </span>
-            </div>
-
-            <div class="text-xs font-mono text-slate-400 italic mb-1">
-              {product.scientificName}
-            </div>
-            
-            <h1 class="text-2xl sm:text-4xl font-extrabold text-aruna-900 mb-2 leading-tight">
-              {product.name}
-            </h1>
-            
-            <div class="flex items-baseline gap-3 mb-6">
-              <span class="text-2xl font-mono font-bold text-aruna-700">
-                {product.pricePerKg}
-              </span>
-              <span class="text-xs text-slate-500">
-                (Kemasan: {product.volume})
-              </span>
-            </div>
-
-            <div class="prose text-slate-600 text-sm leading-relaxed mb-6">
-              <p>{product.description}</p>
-            </div>
-
-            {/* Multi-Warehouse Stock Indicator */}
-            <div class="bg-white border border-slate-200 rounded-2xl p-5 mb-6 shadow-xs">
-              <div class="flex justify-between items-center mb-3">
-                <span class="text-xs font-bold text-aruna-900 uppercase font-mono tracking-wider">
-                  Ketersediaan Stok di Titik Gudang
-                </span>
-                <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-mono text-xs font-bold">
-                  Total: {product.totalStock}
-                </span>
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                  <div class="text-slate-500 text-[11px]">CS Muara Baru (JKT)</div>
-                  <div class="font-mono font-bold text-emerald-600 mt-0.5">{product.stockJakarta}</div>
-                </div>
-                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                  <div class="text-slate-500 text-[11px]">CS Brondong (Jatim)</div>
-                  <div class="font-mono font-bold text-emerald-600 mt-0.5">{product.stockLamongan}</div>
-                </div>
-                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                  <div class="text-slate-500 text-[11px]">CS Benoa (Bali)</div>
-                  <div class="font-mono font-bold mt-0.5 text-slate-700">{product.stockBali}</div>
-                </div>
-              </div>
-              <div class="text-[11px] text-slate-500 font-mono mt-3">
-                Minimum Pemesanan (MOQ): <strong class="text-slate-800">{product.moq}</strong>
-              </div>
-            </div>
-
-            {/* Key Benefits / Function */}
-            <div class="bg-aruna-50/80 border border-aruna-200/70 rounded-2xl p-5 mb-6">
-              <h3 class="text-sm font-bold text-aruna-900 mb-1.5 flex items-center gap-2">
-                <svg class="w-4 h-4 text-aruna-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                Standar Penggunaan Dapur
-              </h3>
-              <p class="text-slate-700 text-xs leading-relaxed">{product.productFunction}</p>
-            </div>
-
-            {/* Problem Specifics */}
-            {(product.problemTitle || product.problemDescription) && (
-              <div class="bg-rose-50/60 border border-rose-200/60 rounded-2xl p-5 mb-6">
-                <h3 class="text-sm font-bold text-rose-900 mb-1">Solusi Mutu Terjamin:</h3>
-                {product.problemTitle && <p class="font-semibold text-rose-800 text-xs mb-1">{product.problemTitle}</p>}
-                <div class="text-slate-600 text-xs leading-relaxed" set:html={product.problemDescription || ''} />
-              </div>
-            )}
+        <div class="order-1 min-w-0 lg:order-2">
+          <div class="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+            <span class="font-semibold text-aruna-700">{product.category}</span>
+            {product.scientificName && <span class="italic text-slate-600">{product.scientificName}</span>}
           </div>
+          <h1 class="max-w-xl text-3xl font-extrabold leading-tight tracking-tight text-aruna-900 sm:text-4xl">{product.name}</h1>
 
-          {/* Primary CTA */}
-          <div className="pt-2">
-            <a
-              href={`https://wa.me/6282241114959?text=Halo%20FisheryTrade,%20saya%20ingin%20memesan%20atau%20meminta%20sampel%20produk%20${encodeURIComponent(product.name)}.`}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="w-full bg-coral-600 hover:bg-coral-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-md text-center block text-sm cursor-pointer"
-            >
-              Pesan / Minta Penawaran B2B (WhatsApp)
-            </a>
+          <div class="mt-5">
+            <p class="text-sm text-slate-600">{isReference ? 'Harga indikatif pada katalog' : 'Harga katalog'}</p>
+            <p class="mt-1 text-2xl font-bold tabular-nums tracking-tight text-aruna-900 sm:text-3xl">{product.pricePerKg || 'Minta penawaran harga'}</p>
           </div>
+          <dl class="mt-5 grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-4 border-y border-slate-200 py-4 text-sm">
+            <div>
+              <dt class="text-slate-600">Minimum pesanan</dt>
+              <dd class="mt-1 font-semibold tabular-nums text-aruna-900">{product.moq || 'Konfirmasi sales'}</dd>
+            </div>
+            <div>
+              <dt class="text-slate-600">Kemasan</dt>
+              <dd class="mt-1 font-medium leading-relaxed text-aruna-900">{product.volume?.replace(/^Kemasan\s+/i, '') || 'Konfirmasi sales'}</dd>
+            </div>
+          </dl>
+
+          <!-- CTA mendahului uraian teknis agar buyer bisa meminta penawaran tanpa membaca seluruh halaman. -->
+          <a href={quoteUrl} target="_blank" rel="noopener noreferrer" class="quote-action mt-5 flex min-h-12 w-full items-center justify-center rounded-lg bg-coral-600 px-5 py-3 text-center text-base font-bold text-aruna-950 transition-colors hover:bg-coral-700 hover:text-white">Minta penawaran</a>
+          <p class="mt-2 text-center text-xs leading-relaxed text-slate-600">Terhubung ke tim sales melalui WhatsApp. Harga akhir mengikuti volume dan tujuan pengiriman.</p>
+
+          <section aria-labelledby="stock-heading" class="mt-7 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+            <div class="flex flex-wrap items-baseline justify-between gap-2">
+              <h2 id="stock-heading" class="text-base font-semibold text-aruna-900">Ketersediaan per gudang</h2>
+              {!isReference && product.totalStock && <span class="text-sm font-semibold tabular-nums text-aruna-700">Total tercatat: {product.totalStock}</span>}
+            </div>
+            <p class="mt-1.5 text-xs leading-relaxed text-slate-600" role={isReference ? 'status' : undefined}>
+              {isReference ? 'Stok belum tersinkron. Angka stok cadangan tidak ditampilkan; minta ketersediaan terbaru melalui tim sales.' : snapshotDate ? `Snapshot katalog: ${snapshotDate} WIB. Bukan jaminan reservasi stok.` : 'Stok tercatat pada katalog. Konfirmasikan ketersediaan sebelum memesan.'}
+            </p>
+            <dl class="mt-3 divide-y divide-slate-200">
+              {warehouses.map((warehouse) => (
+                <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-2.5 text-sm">
+                  <dt class="text-slate-700">{warehouse.name} <span class="text-xs text-slate-600">· {warehouse.location}</span></dt>
+                  <dd class={`font-medium tabular-nums ${isReference || !warehouse.stock ? 'text-slate-600' : 'text-aruna-900'}`}>{isReference || !warehouse.stock ? 'Perlu konfirmasi' : warehouse.stock}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
         </div>
       </div>
     </div>
   </section>
 
-  {/* Related Products */}
-  {otherProducts.length > 0 && (
-    <section class="py-16 bg-white border-t border-slate-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-xl sm:text-2xl font-bold text-aruna-900 mb-6">Komoditas Ikan Lainnya</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {otherProducts.map((p) => (
-            <a href={`/produk/${p.slug}`} class="group block bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden hover:shadow-md hover:border-aruna-300 transition-all">
-              <div class="aspect-[4/3] overflow-hidden bg-slate-100">
-                <img
-                  src={p.imageUrl}
-                  alt={p.name}
-                  class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
+  <section aria-labelledby="details-heading" class="border-y border-slate-200 bg-slate-50 px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+    <div class="mx-auto grid max-w-7xl gap-8 lg:grid-cols-2 lg:gap-12">
+      <div>
+        <h2 id="details-heading" class="text-xl font-bold text-aruna-900">Tentang produk</h2>
+        <p class="mt-4 text-sm leading-7 text-slate-700">{product.description || 'Deskripsi produk belum tersedia. Tim sales dapat membantu mengonfirmasi kebutuhan Anda.'}</p>
+        {product.productFunction && <div class="mt-6"><h3 class="text-sm font-semibold text-aruna-900">Penggunaan pada katalog</h3><p class="mt-2 text-sm leading-7 text-slate-700">{product.productFunction}</p></div>}
+        <p class="mt-5 text-xs leading-relaxed text-slate-600">Untuk kebutuhan konsumsi mentah, konfirmasikan kesesuaian lot, penanganan, dan dokumen keamanan pangan dengan tim sales.</p>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold text-aruna-900">Spesifikasi katalog</h2>
+        {specifications.length > 0 ? (
+          <dl class="mt-4 divide-y divide-slate-200 border-y border-slate-200">
+            {specifications.map(([label, value]) => (
+              <div class="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-4 py-3 text-sm leading-relaxed">
+                <dt class="text-slate-600">{label}</dt>
+                <dd class="font-medium text-aruna-900">{value}</dd>
               </div>
-              <div class="p-4">
-                <span class="text-[10px] font-mono text-aruna-600 font-bold block">{p.freezeMethod}</span>
-                <h3 class="font-bold text-aruna-900 text-sm group-hover:text-aruna-600 transition-colors mt-0.5">{p.name}</h3>
-                <p class="text-xs font-mono font-bold text-slate-700 mt-1">{p.pricePerKg}</p>
+            ))}
+          </dl>
+        ) : <p class="mt-4 text-sm text-slate-600">Spesifikasi belum tersedia. Minta rincian produk dari tim sales.</p>}
+      </div>
+    </div>
+  </section>
+
+  {otherProducts.length > 0 && (
+    <section aria-labelledby="related-heading" class="bg-white px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+      <div class="mx-auto max-w-7xl">
+        <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <h2 id="related-heading" class="text-xl font-bold text-aruna-900">Komoditas lainnya</h2>
+          <a href="/produk/" class="inline-flex min-h-11 items-center text-sm font-semibold text-aruna-700 underline decoration-aruna-200 underline-offset-4 hover:decoration-aruna-700">Lihat seluruh produk</a>
+        </div>
+        <!-- Kartu setara dipakai untuk membandingkan komoditas, bukan untuk mengisi fitur dekoratif. -->
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {otherProducts.map((item) => (
+            <a href={`/produk/${item.slug}/`} class="group flex min-w-0 flex-col rounded-xl border border-slate-200 bg-white p-5 transition-colors hover:border-aruna-600 hover:bg-aruna-50">
+              <span class="text-xs font-medium text-slate-600">{item.category}</span>
+              <h3 class="mb-4 mt-2 text-base font-bold leading-snug text-aruna-900 group-hover:text-aruna-700">{item.name}</h3>
+              <div class="mt-auto">
+                <p class="text-sm font-semibold tabular-nums text-aruna-900">{item.pricePerKg || 'Minta penawaran'}</p>
+                <p class="mt-1 text-xs text-slate-600">{item.catalogSource !== 'live' ? 'Harga indikatif' : 'Harga katalog'} · Min. {item.moq || 'konfirmasi'}</p>
+                <span class="mt-4 inline-flex min-h-6 items-center text-sm font-semibold text-aruna-700">Lihat detail produk</span>
               </div>
             </a>
           ))}
@@ -164,4 +160,27 @@ const otherProducts = allProducts.filter((p) => p.id !== product.id).slice(0, 4)
       </div>
     </section>
   )}
+
+  <aside aria-label="Penawaran produk" class="product-purchase-bar fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white px-4 pt-3 lg:hidden">
+    <div class="mx-auto flex max-w-2xl items-center justify-between gap-3">
+      <div class="min-w-0"><p class="text-xs text-slate-600">{isReference ? 'Harga indikatif' : 'Harga katalog'}</p><p class="mt-0.5 text-sm font-bold tabular-nums text-aruna-900">{product.pricePerKg || 'Hubungi sales'}</p></div>
+      <a href={quoteUrl} target="_blank" rel="noopener noreferrer" class="inline-flex min-h-12 shrink-0 items-center justify-center rounded-lg bg-coral-600 px-4 text-sm font-bold text-aruna-950 hover:bg-coral-700 hover:text-white">Minta penawaran</a>
+    </div>
+  </aside>
 </Layout>
+
+<style>
+  .product-detail :is(a, button):focus-visible,
+  .product-purchase-bar a:focus-visible {
+    outline: 3px solid #006aaf;
+    outline-offset: 4px;
+  }
+  .product-purchase-bar {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+  @media (max-width: 1023px) {
+    :global(body:has(.product-purchase-bar)) {
+      padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+    }
+  }
+</style>

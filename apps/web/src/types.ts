@@ -68,6 +68,8 @@ export interface Product {
   cutType?: string;
   glazing?: string;
   shelfLife?: string;
+  catalogSource?: 'live' | 'reference';
+  catalogFetchedAt?: string;
 }
 
 export interface TeamMember {

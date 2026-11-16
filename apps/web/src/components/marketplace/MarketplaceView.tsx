@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import type { Product } from '../../types.ts';
+import { ADMIN_API_BASE_URL } from '../../lib/catalog-service.ts';
 
 const WAREHOUSE_OPTIONS = [
   { id: 'all', label: 'Semua Cold Storage', hub: 'Seluruh Titik Distribusi' },
@@ -16,48 +17,49 @@ interface MarketplaceViewProps {
 
 export const MarketplaceView: React.FC<MarketplaceViewProps> = ({ products }) => {
   const [items, setItems] = useState<Product[]>(products);
+  const [catalogSource, setCatalogSource] = useState<'live' | 'reference'>(
+    products.every((product) => product.catalogSource === 'live') ? 'live' : 'reference'
+  );
 
   // Sync state if products prop changes
   useEffect(() => {
     setItems(products);
+    setCatalogSource(products.every((product) => product.catalogSource === 'live') ? 'live' : 'reference');
   }, [products]);
 
-  // Client-side real-time stock refresh from Admin WMS API
+  // Refresh the live product catalog so admin changes appear without rebuilding the static site.
   useEffect(() => {
-    const fetchLiveStock = async () => {
+    const fetchLiveCatalog = async () => {
       try {
-        const apiUrl = 'http://localhost:4000';
-        const res = await fetch(`${apiUrl}/api/catalog?format=marketplace`, {
+        const res = await fetch(`${ADMIN_API_BASE_URL}/api/catalog?format=marketplace`, {
           headers: { Accept: 'application/json' },
         });
         if (res.ok) {
           const json = await res.json();
-          if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-            setItems((prev) =>
-              prev.map((item) => {
-                const live = json.data.find(
-                  (l: Product) => l.slug === item.slug || l.name === item.name
-                );
-                if (!live) return item;
-                return {
-                  ...item,
-                  pricePerKg: live.pricePerKg || item.pricePerKg,
-                  priceNumeric: live.priceNumeric || item.priceNumeric,
-                  stockJakarta: live.stockJakarta || item.stockJakarta,
-                  stockLamongan: live.stockLamongan || item.stockLamongan,
-                  stockBali: live.stockBali || item.stockBali,
-                  totalStock: live.totalStock || item.totalStock,
-                };
-              })
-            );
+          if (json.success && Array.isArray(json.data)) {
+            const liveProducts: Product[] = json.data.map((live: Product) => {
+              const fallback = products.find((item) => item.slug === live.slug);
+              return {
+                ...fallback,
+                ...live,
+                images: live.images?.length ? live.images : fallback?.images || [live.imageUrl],
+                productFunction: live.productFunction ?? fallback?.productFunction ?? '',
+                problemTitle: live.problemTitle ?? fallback?.problemTitle,
+                problemDescription: live.problemDescription ?? fallback?.problemDescription,
+                catalogSource: 'live',
+                catalogFetchedAt: new Date().toISOString(),
+              };
+            });
+            setItems(liveProducts);
+            setCatalogSource('live');
           }
         }
       } catch {
-        // Fallback silently if admin server is offline
+        // Keep the build-time catalog if the API is temporarily offline.
       }
     };
-    fetchLiveStock();
-  }, []);
+    void fetchLiveCatalog();
+  }, [products]);
 
   // Search and warehouse filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -97,6 +99,15 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({ products }) =>
 
   // Slide-over Inspector Drawer State
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  const openProduct = (product?: Product) => {
+    if (!product) return;
+    if (window.matchMedia('(max-width: 767px)').matches) {
+      window.location.assign(`/produk/${encodeURIComponent(product.slug)}/`);
+      return;
+    }
+    setSelectedProduct(product);
+  };
 
   // In-Drawer RFQ & Truckload Calculator State
   const [calcVolumeKg, setCalcVolumeKg] = useState<number>(250);
@@ -210,32 +221,32 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({ products }) =>
     <div className="w-full bg-slate-50 min-h-screen">
       
       {/* Top Marketplace Command Bar (Utilitarian & Transparent) */}
-      <section className="bg-aruna-950 text-white pt-20 sm:pt-24 pb-8 sm:pb-10 px-4 sm:px-6 lg:px-8 border-b border-aruna-900 relative">
+      <section className="bg-white text-slate-900 pt-20 pb-3 px-3 border-b border-slate-200 relative sm:bg-aruna-950 sm:text-white sm:pt-24 sm:pb-10 sm:px-6 lg:px-8 sm:border-aruna-900">
         <div className="relative z-10 max-w-7xl mx-auto">
           
           {/* Breadcrumb */}
-          <div className="flex items-center text-aruna-200 mb-3 text-xs">
+          <div className="hidden sm:flex items-center text-aruna-200 mb-3 text-xs">
             <a href="/" className="hover:text-white transition-colors">Beranda</a>
             <span className="mx-2 text-aruna-400">/</span>
             <span className="text-white font-semibold">Marketplace Komoditas</span>
           </div>
 
           {/* Clean B2B Title & Quick Value Promise */}
-          <div className="max-w-3xl mb-6">
-            <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+          <div className="max-w-3xl mb-0 sm:mb-6">
+            <h1 className="sr-only sm:not-sr-only sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
               Marketplace Komoditas Ikan & Hasil Laut B2B
             </h1>
-            <p className="mt-2 text-sm sm:text-base text-aruna-100/90 leading-relaxed">
+            <p className="hidden sm:block mt-2 text-sm sm:text-base text-aruna-100/90 leading-relaxed">
               Cek harga terbuka per kg, ketersediaan tonase fisik per titik cold storage, dan spesifikasi potongan siap olah langsung dari nelayan untuk kebutuhan restoran, hotel, katering, dan grosir.
             </p>
           </div>
 
           {/* Single-Row Fast Command Deck */}
-          <div className="bg-white rounded-xl p-3.5 sm:p-4 shadow-md border border-slate-200 text-slate-800">
-            <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
+          <div className="rounded-none border-0 bg-transparent p-0 text-slate-800 shadow-none sm:rounded-xl sm:border sm:border-slate-200 sm:bg-white sm:p-4 sm:shadow-md">
+            <div className="flex flex-row items-stretch gap-2 sm:gap-3 md:items-center">
               
               {/* Search input with live clear button */}
-              <div className="relative flex-grow">
+              <div className="relative min-w-0 flex-grow">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -245,7 +256,7 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({ products }) =>
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Cari nama komoditas, jenis potongan (fillet, loin, utuh), atau nama latin..."
+                  placeholder="Cari produk..."
                   className="w-full text-xs sm:text-sm pl-10 pr-10 min-h-[44px] py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-aruna-700 focus:border-transparent transition-all"
                   aria-label="Pencarian komoditas"
                 />
@@ -263,11 +274,11 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({ products }) =>
               </div>
 
               {/* Custom Warehouse Selector Popover */}
-              <div ref={warehouseRef} className="relative w-full md:w-64 flex-shrink-0">
+              <div ref={warehouseRef} className="relative w-[42%] flex-shrink-0 md:w-64">
                 <button
                   type="button"
                   onClick={() => setIsWarehouseOpen(!isWarehouseOpen)}
-                  className={`w-full min-h-[44px] px-3.5 py-2 rounded-lg border text-left transition-all flex items-center justify-between gap-2.5 ${
+                  className={`w-full min-h-[44px] px-2.5 py-2 sm:px-3.5 rounded-lg border text-left transition-all flex items-center justify-between gap-2 ${
                     isWarehouseOpen
                       ? 'border-aruna-700 bg-white ring-2 ring-aruna-700/20 shadow-xs'
                       : 'border-slate-200 bg-slate-50 hover:bg-white hover:border-slate-300'
@@ -277,16 +288,16 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({ products }) =>
                   aria-label="Pilih lokasi cold storage"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-7 h-7 rounded-md bg-white border border-slate-200 flex items-center justify-center text-slate-500 flex-shrink-0 shadow-2xs">
+                    <div className="hidden sm:flex w-7 h-7 rounded-md bg-white border border-slate-200 items-center justify-center text-slate-500 flex-shrink-0 shadow-2xs">
                       <svg className="w-3.5 h-3.5 text-aruna-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                       </svg>
                     </div>
                     <div className="truncate">
-                      <span className="block text-[10px] uppercase font-bold tracking-wider text-slate-600 leading-tight">
+                      <span className="hidden sm:block text-[10px] uppercase font-bold tracking-wider text-slate-600 leading-tight">
                         Lokasi Hub
                       </span>
-                      <span className="block text-xs font-bold text-slate-900 truncate">
+                      <span className="block text-[10px] sm:text-xs font-bold text-slate-900 truncate">
                         {currentWarehouse.label}
                       </span>
                     </div>
@@ -364,13 +375,14 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({ products }) =>
 
               {/* Quick Simulator CTA */}
               <button
-                onClick={() => setSelectedProduct(products[0])}
-                className="w-full md:w-auto flex-shrink-0 inline-flex items-center justify-center gap-2 min-h-[44px] py-2.5 px-4 rounded-lg bg-coral-500 hover:bg-coral-600 text-white text-xs sm:text-sm font-bold transition-colors shadow-xs"
+                onClick={() => openProduct(items[0])}
+                className="hidden md:inline-flex w-full md:w-auto flex-shrink-0 items-center justify-center gap-2 min-h-[44px] py-2.5 px-4 rounded-lg bg-coral-500 hover:bg-coral-600 text-white text-xs sm:text-sm font-bold transition-colors shadow-xs"
               >
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
-                <span>Simulasi Muatan Truk</span>
+                <span className="md:hidden">Lihat Detail Produk</span>
+                <span className="hidden md:inline">Simulasi Muatan Truk</span>
               </button>
             </div>
           </div>
@@ -378,18 +390,38 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({ products }) =>
       </section>
 
       {/* Main Trading Terminal Section */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-10 pb-10">
+
+        {catalogSource === 'reference' && (
+          <div role="status" className="mb-3 flex items-start gap-2.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2.5 text-amber-950 sm:mb-4 sm:rounded-xl sm:px-4 sm:py-3">
+            <span aria-hidden="true" className="mt-0.5 inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-amber-200 text-xs font-extrabold">!</span>
+            <div>
+              <p className="text-xs font-extrabold sm:text-sm">Mode preview — data contoh</p>
+              <p className="mt-0.5 text-[11px] leading-relaxed sm:text-xs">
+                Harga, stok, dan foto yang ditampilkan belum berasal dari katalog live dan bukan informasi operasional.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Results Toolbar & Active Filter Status */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-200">
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600 font-medium">
-            <span className="font-bold text-aruna-900">Katalog Pasokan Terbuka</span>
-            <span className="text-slate-300">•</span>
-            <span>Menampilkan</span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 mb-3 pb-2 sm:mb-4 sm:pb-3 border-b border-slate-200">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm text-slate-600 font-medium">
+            <span className="font-bold text-aruna-900">
+              <span className="sm:hidden">Katalog</span>
+              <span className="hidden sm:inline">Katalog Pasokan Terbuka</span>
+            </span>
+            <span className="hidden text-slate-300 sm:inline">•</span>
+            <span className="hidden sm:inline">Menampilkan</span>
             <span className="font-sans font-bold text-aruna-800 bg-aruna-100 px-2 py-0.5 rounded-md tabular-nums">
               {filteredProducts.length}
             </span>
-            <span>dari {products.length} komoditas ready stock</span>
+            <span>
+              <span className="sm:hidden">dari {items.length} produk</span>
+              <span className="hidden sm:inline">
+                dari {items.length} {catalogSource === 'reference' ? 'produk contoh' : 'komoditas ready stock'}
+              </span>
+            </span>
           </div>
 
           {/* Active filter badges */}
@@ -450,179 +482,147 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({ products }) =>
           </div>
         )}
 
-        {/* Desktop View: Commodity Trading Table (Direction 1) */}
+        {/* Desktop View: responsive product-card grid */}
         {filteredProducts.length > 0 && (
-          <div className="hidden md:block bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead className="bg-slate-100/80 border-b border-slate-200 text-[11px] font-semibold uppercase text-slate-600 tracking-wider">
-                <tr>
-                  <th scope="col" className="py-3.5 px-4 w-[28%]">Komoditas & Spesifikasi</th>
-                  <th scope="col" className="py-3.5 px-4 w-[20%]">Mutu & Metode Pembekuan</th>
-                  <th scope="col" className="py-3.5 px-4 w-[22%]">Stok Fisik Cold Storage</th>
-                  <th scope="col" className="py-3.5 px-4 w-[16%]">Harga Terbuka / Kg</th>
-                  <th scope="col" className="py-3.5 px-4 w-[14%] text-center">Aksi Cepat</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filteredProducts.map((product) => (
-                  <tr
-                    key={product.id}
-                    onClick={() => setSelectedProduct(product)}
-                    className="hover:bg-aruna-50/50 transition-colors cursor-pointer group"
-                  >
-                    {/* Column 1: Image, Commodity Name, Scientific Name, Cut Tag */}
-                    <td className="py-3.5 px-4 align-middle">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={product.imageUrl}
-                          alt={product.name}
-                          className="w-14 h-14 rounded-lg object-cover border border-slate-200 flex-shrink-0 group-hover:scale-105 transition-transform"
-                          loading="lazy"
-                        />
-                        <div className="min-w-0">
-                          <span className="font-bold text-sm text-aruna-900 group-hover:text-aruna-600 transition-colors block truncate">
-                            {product.name}
-                          </span>
-                          <span className="text-[11px] font-mono text-slate-400 italic block truncate">
-                            {product.scientificName}
-                          </span>
-                          <div className="mt-1 flex items-center gap-1.5 flex-wrap">
-                            <span className="inline-block px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[10px] font-semibold border border-slate-200/60">
-                              {product.cutType || product.category}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Column 2: Quality & Freezing Method */}
-                    <td className="py-3.5 px-4 align-middle">
-                      <div className="space-y-0.5">
-                        <span className="font-bold text-slate-800 block text-xs">
-                          {product.grade || 'Grade A'}
-                        </span>
-                        <span className="inline-block px-1.5 py-0.2 rounded bg-aruna-50 text-aruna-800 font-mono text-[10px] font-semibold border border-aruna-200/60">
-                          {product.freezeMethod || 'IQF -25°C'}
-                        </span>
-                        {product.glazing && (
-                          <span className="text-[11px] font-medium text-emerald-700 block">
-                            Glazing: {product.glazing}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Column 3: Cold Storage Stock Breakdown */}
-                    <td className="py-3.5 px-4 align-middle">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-3 text-[11px]">
-                          <span className="text-slate-400 w-16">Muara Baru:</span>
-                          <span className={product.stockJakarta?.includes('Habis') ? 'text-slate-400 font-normal' : 'text-slate-800 font-bold tabular-nums'}>
-                            {product.stockJakarta || '-'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3 text-[11px]">
-                          <span className="text-slate-400 w-16">Brondong:</span>
-                          <span className={product.stockLamongan?.includes('Habis') ? 'text-slate-400 font-normal' : 'text-slate-800 font-bold tabular-nums'}>
-                            {product.stockLamongan || '-'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3 text-[11px]">
-                          <span className="text-slate-400 w-16">Benoa:</span>
-                          <span className={product.stockBali?.includes('Habis') ? 'text-slate-400 font-normal' : 'text-slate-800 font-bold tabular-nums'}>
-                            {product.stockBali || '-'}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Column 4: Price / Kg & MOQ */}
-                    <td className="py-3.5 px-4 align-middle">
-                      <div>
-                        <span className="text-sm font-extrabold text-aruna-900 block tabular-nums">
-                          {product.pricePerKg}
-                        </span>
-                        <span className="text-[11px] text-slate-500 block">
-                          MOQ: <strong className="text-slate-700">{product.moq || '100 kg'}</strong>
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* Column 5: Actions */}
-                    <td className="py-3.5 px-4 align-middle text-center" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => setSelectedProduct(product)}
-                          className="py-1.5 px-3 rounded-lg bg-aruna-50 hover:bg-aruna-100 text-aruna-700 font-bold text-xs transition-colors border border-aruna-200"
-                          title="Inspeksi Detail & Mutu"
-                        >
-                          Inspeksi
-                        </button>
-                        <a
-                          href={product.whatsappUrl || `https://wa.me/6282241114959?text=Halo%20FisheryTrade,%20saya%20ingin%20memesan%20${encodeURIComponent(product.name)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="py-1.5 px-3 rounded-lg bg-coral-500 hover:bg-coral-600 text-white font-bold text-xs transition-colors shadow-xs"
-                          title="Pesan Langsung via WhatsApp"
-                        >
-                          Pesan
-                        </a>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Mobile View: High-Density Trading Strips (< md) */}
-        {filteredProducts.length > 0 && (
-          <div className="md:hidden space-y-3">
+          <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-stretch gap-4">
             {filteredProducts.map((product) => (
-              <div
+              <article
                 key={product.id}
-                onClick={() => setSelectedProduct(product)}
-                className="bg-white rounded-xl border border-slate-200 p-3.5 shadow-xs flex items-center justify-between gap-3 active:bg-slate-50 cursor-pointer"
+                className="group flex min-w-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:border-aruna-300 hover:shadow-md"
               >
-                <div className="flex items-center gap-3 min-w-0">
+                <div className="relative aspect-square w-full overflow-hidden bg-slate-100">
                   <img
                     src={product.imageUrl}
                     alt={product.name}
-                    className="w-14 h-14 rounded-lg object-cover border border-slate-200 flex-shrink-0"
+                    className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
                     loading="lazy"
                   />
-                  <div className="min-w-0">
-                    <span className="font-bold text-xs text-aruna-900 block truncate">
-                      {product.name}
+                  {product.grade && (
+                    <span className="absolute left-2.5 top-2.5 max-w-[calc(100%-1.25rem)] truncate rounded-md bg-white/95 px-2 py-1 text-[10px] font-bold text-aruna-900 shadow-sm">
+                      {product.grade}
                     </span>
-                    <span className="text-[10px] text-slate-400 italic block truncate font-mono">
-                      {product.scientificName}
+                  )}
+                  {product.catalogSource === 'live' && product.totalStock && (
+                    <span className="absolute right-2.5 top-2.5 rounded-md bg-emerald-700/95 px-2 py-1 text-[10px] font-bold text-white shadow-sm">
+                      Stok aktif
                     </span>
-                    <div className="mt-1 flex items-center gap-1.5 text-[10px]">
-                      <span className="px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-semibold">
-                        {product.cutType || product.category}
-                      </span>
-                      <span className="text-slate-400">•</span>
-                      <span className="font-bold text-aruna-800 tabular-nums">
-                        {product.pricePerKg}
-                      </span>
-                    </div>
-                  </div>
+                  )}
                 </div>
 
-                <div className="flex-shrink-0">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedProduct(product);
-                    }}
-                    className="py-1.5 px-3 rounded-lg bg-aruna-50 text-aruna-700 font-bold text-xs border border-aruna-200"
-                  >
-                    Detail
-                  </button>
+                <div className="flex flex-1 flex-col p-3">
+                  <span className="block truncate text-[10px] font-semibold uppercase tracking-wide text-aruna-700">
+                    {product.cutType || product.category}
+                  </span>
+                  <h2 className="mt-1 line-clamp-2 min-h-10 text-sm font-bold leading-snug">
+                    <button type="button" onClick={() => setSelectedProduct(product)} className="text-left text-aruna-900 transition-colors hover:text-aruna-700">
+                      {product.name}
+                    </button>
+                  </h2>
+                  <p className="mt-0.5 truncate text-[11px] italic text-slate-400">
+                    {product.scientificName || 'Komoditas perikanan'}
+                  </p>
+
+                  <div className="mt-3 border-t border-slate-100 pt-2.5">
+                    <span className="block text-[10px] text-slate-500">Harga terbuka / kg</span>
+                    <span className="mt-0.5 block truncate text-base font-extrabold tabular-nums text-coral-700">
+                      {product.pricePerKg || 'Harga melalui RFQ'}
+                    </span>
+                    <div className="mt-1 flex items-center justify-between gap-2 text-[10px] text-slate-600">
+                      <span className="truncate">MOQ <strong className="text-slate-800">{product.moq || 'Hubungi sales'}</strong></span>
+                      <span className="truncate text-right">{product.freezeMethod || product.grade || 'Mutu terstandar'}</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-1 gap-1.5 border-t border-slate-100 pt-2.5 text-[10px]">
+                    {[
+                      ['Muara Baru', product.stockJakarta],
+                      ['Brondong', product.stockLamongan],
+                      ['Benoa', product.stockBali],
+                    ].map(([warehouse, stock]) => (
+                      <div key={warehouse} className="flex items-center justify-between gap-2">
+                        <span className="truncate text-slate-500">{warehouse}</span>
+                        <span className={`truncate text-right tabular-nums ${stock?.includes('Habis') ? 'font-normal text-slate-400' : 'font-semibold text-slate-700'}`}>
+                          {stock || 'Cek stok'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-3 flex gap-2 border-t border-slate-100 pt-3">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedProduct(product)}
+                      className="min-h-9 flex-1 rounded-lg border border-aruna-200 bg-aruna-50 px-2 text-[11px] font-bold text-aruna-700 transition-colors hover:bg-aruna-100"
+                    >
+                      Detail
+                    </button>
+                    <a
+                      href={product.whatsappUrl || `https://wa.me/6282241114959?text=Halo%20FisheryTrade,%20saya%20ingin%20memesan%20${encodeURIComponent(product.name)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex min-h-9 flex-1 items-center justify-center rounded-lg bg-coral-500 px-2 text-[11px] font-bold text-white shadow-xs transition-colors hover:bg-coral-600"
+                    >
+                      Pesan
+                    </a>
+                  </div>
                 </div>
-              </div>
+              </article>
+            ))}
+          </div>
+        )}
+
+        {/* Mobile View: compact marketplace cards echo the reference while keeping B2B facts accurate. */}
+        {filteredProducts.length > 0 && (
+          <div className="grid grid-cols-2 items-stretch gap-2 md:hidden sm:gap-3">
+            {filteredProducts.map((product) => (
+              <a
+                key={product.id}
+                href={`/produk/${encodeURIComponent(product.slug)}/`}
+                aria-label={`Lihat detail ${product.name}`}
+                className="group flex h-full min-w-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md active:bg-slate-50 sm:rounded-xl"
+              >
+                <div className="relative aspect-square w-full overflow-hidden bg-slate-100">
+                  <img
+                    src={product.imageUrl}
+                    alt={product.name}
+                    className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
+                    loading="lazy"
+                  />
+                  {product.grade && (
+                    <span className="absolute left-2 top-2 max-w-[calc(100%-1rem)] truncate rounded-md bg-white/95 px-2 py-1 text-[9px] font-bold text-aruna-900 shadow-sm sm:text-[10px]">
+                      {product.grade}
+                    </span>
+                  )}
+                  {product.catalogSource === 'live' && product.totalStock && (
+                    <span className="absolute right-2 top-2 rounded-md bg-emerald-700/95 px-2 py-1 text-[9px] font-bold text-white shadow-sm">
+                      Stok aktif
+                    </span>
+                  )}
+                </div>
+                <div className="flex min-h-[132px] flex-1 flex-col p-2 sm:min-h-[142px] sm:p-3">
+                  <span className="block truncate text-[9px] font-semibold uppercase tracking-wide text-aruna-700 sm:text-[10px]">
+                    {product.cutType || product.category}
+                  </span>
+                  <h2 className="mt-1 line-clamp-2 min-h-[2.25rem] text-xs font-bold leading-snug text-aruna-900 sm:min-h-[2.5rem] sm:text-sm">
+                    {product.name}
+                  </h2>
+                  <div className="mt-auto border-t border-slate-100 pt-1.5 sm:pt-2">
+                    <span className="block text-[9px] text-slate-500 sm:text-[10px]">Harga / kg</span>
+                    <span className="mt-0.5 block truncate text-xs font-extrabold tabular-nums text-coral-700 sm:text-sm">
+                      {product.pricePerKg || 'Harga melalui RFQ'}
+                    </span>
+                    <div className="mt-1.5 flex items-center justify-between gap-1 text-[9px] font-medium text-slate-600 sm:text-[10px]">
+                      <span className="truncate">MOQ {product.moq || 'Hubungi sales'}</span>
+                      <span className="truncate text-right">{product.totalStock ? `Stok ${product.totalStock}` : 'Cek stok'}</span>
+                    </div>
+                    {product.freezeMethod && (
+                      <span className="mt-1 block truncate text-[9px] text-slate-500 sm:text-[10px]">
+                        {product.freezeMethod}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </a>
             ))}
           </div>
         )}
@@ -652,10 +652,11 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({ products }) =>
                 Jadwal Ambil Mandiri
               </a>
               <button
-                onClick={() => setSelectedProduct(products[0])}
+                onClick={() => openProduct(items[0])}
                 className="min-h-[44px] py-2.5 px-5 rounded-lg bg-coral-500 hover:bg-coral-600 text-white text-xs font-bold text-center inline-flex items-center justify-center transition-colors shadow-xs"
               >
-                Simulasi Muatan Truk
+                <span className="md:hidden">Lihat Detail Produk</span>
+                <span className="hidden md:inline">Simulasi Muatan Truk</span>
               </button>
             </div>
           </div>
@@ -954,12 +955,13 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({ products }) =>
                   <span>Ajukan RFQ Komoditas ke WhatsApp Sales</span>
                 </a>
 
-                <a
-                  href={`/produk/${selectedProduct.slug}`}
+                <button
+                  type="button"
+                  onClick={() => setSelectedProduct(null)}
                   className="min-h-[44px] py-2.5 px-4 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs text-center inline-flex items-center justify-center transition-colors"
                 >
-                  Lembar Spesifikasi Penuh →
-                </a>
+                  Kembali ke Daftar Produk
+                </button>
               </div>
 
             </div>
